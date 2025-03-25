@@ -1,10 +1,12 @@
 package android.src.main.java.com.mattiolichiara.flutter_pitch_detection;
 
 import be.tarsos.dsp.AudioDispatcher;
-import be.tarsos.dsp.io.android.AudioDispatcherFactory;
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
+
+import be.tarsos.dsp.android.AudioDispatcherFactory;
+
 import android.util.Log;
 import io.flutter.plugin.common.MethodChannel.Result;
 
@@ -22,7 +24,7 @@ public class PitchDetectionService {
     }
 
     public void setOnPitchDetectedListener(OnPitchDetectedListener listener) {
-        this.pitchListener = listener;
+        //this.pitchListener = listener;
     }
 
     public void startPitchDetection(Result result) {
