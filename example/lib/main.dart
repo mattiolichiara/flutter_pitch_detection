@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_pitch_detection/flutter_pitch_detection.dart';
+import 'package:flutter_pitch_detection/flutter_pitch_detection_platform_interface.dart';
 
 void main() {
   runApp(const MyApp());
@@ -32,7 +33,7 @@ class _MyAppState extends State<MyApp> {
     // We also handle the message potentially returning null.
     try {
       platformVersion =
-          await FlutterPitchDetection.getPlatformVersion() ?? 'Unknown platform version';
+          await _flutterPitchDetectionPlugin.getPlatformVersion() ?? 'Unknown platform version';
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }

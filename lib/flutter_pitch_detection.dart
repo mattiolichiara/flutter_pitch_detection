@@ -25,4 +25,32 @@ abstract class FlutterPitchDetectionPlatform extends PlatformInterface {
   });
 
   Future<void> stopDetection();
+
+  Future<String?> getPlatformVersion() {
+    return FlutterPitchDetectionPlatform.instance.getPlatformVersion();
+  }
+
+  Future<void> setParameters({
+    int? sampleRate,
+    int? bufferSize,
+    double? accuracy,
+  }) async {
+    await FlutterPitchDetectionPlatform.instance.setParameters(
+      sampleRate: sampleRate,
+      bufferSize: bufferSize,
+      accuracy: accuracy,
+    );
+  }
+
+  Future<void> setSampleRate(int sampleRate) async {
+    await FlutterPitchDetectionPlatform.instance.setSampleRate(sampleRate);
+  }
+
+  Future<void> setBufferSize(int bufferSize) async {
+    await FlutterPitchDetectionPlatform.instance.setBufferSize(bufferSize);
+  }
+
+  Future<void> setAccuracy(double accuracy) async {
+    await FlutterPitchDetectionPlatform.instance.setAccuracy(accuracy);
+  }
 }

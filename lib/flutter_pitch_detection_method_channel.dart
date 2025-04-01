@@ -43,4 +43,60 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
       throw Exception('Failed to stop detection: ${e.message}');
     }
   }
+
+  @override
+  Future<String?> getPlatformVersion() async {
+    final version = await _methodChannel.invokeMethod<String>('getPlatformVersion');
+    return version;
+  }
+
+  @override
+  Future<void> setParameters({
+    int? sampleRate,
+    int? bufferSize,
+    double? accuracy,
+  }) async {
+    try {
+      await _methodChannel.invokeMethod('setParameters', {
+        if (sampleRate != null) 'sampleRate': sampleRate,
+        if (bufferSize != null) 'bufferSize': bufferSize,
+        if (accuracy != null) 'accuracy': accuracy,
+      });
+    } on PlatformException catch (e) {
+      throw Exception('Failed to set parameters: ${e.message}');
+    }
+  }
+
+  @override
+  Future<void> setSampleRate(int sampleRate) async {
+    try {
+      await _methodChannel.invokeMethod('setSampleRate', {
+        'sampleRate': sampleRate,
+      });
+    } on PlatformException catch (e) {
+      throw Exception('Failed to set sample rate: ${e.message}');
+    }
+  }
+
+  @override
+  Future<void> setBufferSize(int bufferSize) async {
+    try {
+      await _methodChannel.invokeMethod('setBufferSize', {
+        'bufferSize': bufferSize,
+      });
+    } on PlatformException catch (e) {
+      throw Exception('Failed to set buffer size: ${e.message}');
+    }
+  }
+
+  @override
+  Future<void> setAccuracy(double accuracy) async {
+    try {
+      await _methodChannel.invokeMethod('setAccuracy', {
+        'accuracy': accuracy,
+      });
+    } on PlatformException catch (e) {
+      throw Exception('Failed to set accuracy: ${e.message}');
+    }
+  }
 }
