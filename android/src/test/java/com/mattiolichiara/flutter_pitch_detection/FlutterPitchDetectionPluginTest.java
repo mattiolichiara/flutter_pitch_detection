@@ -16,14 +16,14 @@ import org.junit.Test;
  */
 
 public class FlutterPitchDetectionPluginTest {
-  @Test
-  public void onMethodCall_getPlatformVersion_returnsExpectedValue() {
-    FlutterPitchDetectionPlugin plugin = new FlutterPitchDetectionPlugin();
-
-    final MethodCall call = new MethodCall("getPlatformVersion", null);
-    MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
-    plugin.onMethodCall(call, mockResult);
-
-    verify(mockResult).success("Android " + android.os.Build.VERSION.RELEASE);
-  }
+//  @Test
+//  public void onMethodCall_getPlatformVersion_returnsExpectedValue() {
+//    FlutterPitchDetectionPlugin plugin = new FlutterPitchDetectionPlugin();
+//
+////    final MethodCall call = new MethodCall("getPlatformVersion", null);
+////    MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
+////    plugin.onMethodCall(call, mockResult);
+////
+////    verify(mockResult).success("Android " + android.os.Build.VERSION.RELEASE);
+//  }
 }

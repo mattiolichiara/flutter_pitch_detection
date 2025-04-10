@@ -44,11 +44,11 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
     }
   }
 
-  @override
-  Future<String?> getPlatformVersion() async {
-    final version = await _methodChannel.invokeMethod<String>('getPlatformVersion');
-    return version;
-  }
+  // @override
+  // Future<String?> getPlatformVersion() async {
+  //   final version = await _methodChannel.invokeMethod<String>('getPlatformVersion');
+  //   return version;
+  // }
 
   @override
   Future<void> setParameters({

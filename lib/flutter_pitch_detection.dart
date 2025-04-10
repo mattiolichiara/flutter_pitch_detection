@@ -26,9 +26,9 @@ abstract class FlutterPitchDetectionPlatform extends PlatformInterface {
 
   Future<void> stopDetection();
 
-  Future<String?> getPlatformVersion() {
-    return FlutterPitchDetectionPlatform.instance.getPlatformVersion();
-  }
+  // Future<String?> getPlatformVersion() {
+  //   return FlutterPitchDetectionPlatform.instance.getPlatformVersion();
+  // }
 
   Future<void> setParameters({
     int? sampleRate,

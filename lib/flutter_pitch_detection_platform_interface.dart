@@ -7,9 +7,9 @@ class FlutterPitchDetection {
 
   Stream<Map<String, dynamic>> get onPitchDetected => _platform.onPitchDetected;
 
-  Future<String?> getPlatformVersion() {
-    return _platform.getPlatformVersion();
-  }
+  // Future<String?> getPlatformVersion() {
+  //   return _platform.getPlatformVersion();
+  // }
 
   Future<void> startDetection({
     int sampleRate = 44100,

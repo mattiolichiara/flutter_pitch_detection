@@ -14,8 +14,8 @@ class MockFlutterPitchDetectionPlatform with MockPlatformInterfaceMixin implemen
   double _accuracy = 0.8;
   bool _isRunning = false;
 
-  @override
-  Future<String?> getPlatformVersion() => Future.value('42');
+  // @override
+  // Future<String?> getPlatformVersion() => Future.value('42');
 
   @override
   Stream<Map<String, dynamic>> get onPitchDetected => _controller.stream;
@@ -83,7 +83,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('MethodChannelFlutterPitchDetection', () {
-    const MethodChannel channel = MethodChannel('pitch_detection');
+    const MethodChannel channel = MethodChannel('pitch_detection/methods');
     const EventChannel eventChannel = EventChannel('pitch_detection/events');
 
     late MethodChannelFlutterPitchDetection plugin;
@@ -93,8 +93,8 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
         switch (methodCall.method) {
-          case 'getPlatformVersion':
-            return 'Android 10';
+          // case 'getPlatformVersion':
+          //   return 'Android 10';
           default:
             return null;
         }
@@ -106,9 +106,9 @@ void main() {
           .setMockMethodCallHandler(channel, null);
     });
 
-    test('getPlatformVersion returns Android version', () async {
-      expect(await plugin.getPlatformVersion(), 'Android 10');
-    });
+    // test('getPlatformVersion returns Android version', () async {
+    //   expect(await plugin.getPlatformVersion(), 'Android 10');
+    // });
   });
 
   group('FlutterPitchDetection', () {
@@ -119,9 +119,9 @@ void main() {
       FlutterPitchDetectionPlatform.instance = mockPlatform;
     });
 
-    test('getPlatformVersion with mock', () async {
-      final flutterPitchDetection = FlutterPitchDetection();
-      expect(await flutterPitchDetection.getPlatformVersion(), '42');
-    });
+    // test('getPlatformVersion with mock', () async {
+    //   final flutterPitchDetection = FlutterPitchDetection();
+    //   expect(await flutterPitchDetection.getPlatformVersion(), '42');
+    // });
   });
 }

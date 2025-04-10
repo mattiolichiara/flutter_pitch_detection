@@ -12,9 +12,9 @@ public class PitchDetectionService {
     private int overlap;
     private float accuracy = 1f;
 
-    public String getPlatformVersion() {
-        return "Android " + android.os.Build.VERSION.RELEASE;
-    }
+//    public String getPlatformVersion() {
+//        return "Android " + android.os.Build.VERSION.RELEASE;
+//    }
 
     public PitchDetectionService(int sampleRate, int bufferSize, int overlap,
                                  PitchDetectionHandler pitchHandler) {
