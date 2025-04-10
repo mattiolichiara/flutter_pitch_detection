@@ -11,6 +11,8 @@ public class PitchDetectionService {
     private int bufferSize;
     private int overlap;
     private float accuracy = 1f;
+    private boolean isRecording = false;
+    private boolean isPermissionGranted = false;
 
 //    public String getPlatformVersion() {
 //        return "Android " + android.os.Build.VERSION.RELEASE;
@@ -22,6 +24,7 @@ public class PitchDetectionService {
         this.bufferSize = bufferSize;
         this.overlap = overlap;
         this.pitchHandler = pitchHandler;
+        checkAudioPermission();
     }
 
     public void setParameters(int sampleRate, int bufferSize, float accuracy) {
@@ -41,6 +44,41 @@ public class PitchDetectionService {
     public void setAccuracy(float accuracy) {
         this.accuracy = accuracy;
     }
+    public boolean isRecording() {
+        return isRecording;
+    }
+
+    public int getSampleRate() {
+        return sampleRate;
+    }
+
+    public int getBufferSize() {
+        return bufferSize;
+    }
+
+    public float getAccuracy() {
+        return accuracy;
+    }
+
+    private void checkAudioPermission() {
+        if (ContextCompat.checkSelfPermission(context,
+                Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            isPermissionGranted = true;
+        } else {
+            if (context instanceof Activity) {
+                ActivityCompat.requestPermissions((Activity) context,
+                        new String[]{Manifest.permission.RECORD_AUDIO},
+                        AUDIO_PERMISSION_REQUEST_CODE);
+            }
+        }
+    }
+
+    public void handlePermissionResult(int requestCode, int[] grantResults) {
+        if (requestCode == AUDIO_PERMISSION_REQUEST_CODE) {
+            isPermissionGranted = grantResults.length > 0 &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED;
+        }
+    }
 
     public void start() {
         dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(
@@ -54,11 +92,13 @@ public class PitchDetectionService {
         ));
 
         new Thread(dispatcher, "Audio Dispatcher").start();
+        isRecording = true;
     }
 
     public void stop() {
         if (dispatcher != null && !dispatcher.isStopped()) {
             dispatcher.stop();
+            isRecording = false;
         }
     }
 }

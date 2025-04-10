@@ -135,6 +135,59 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
         result.success(null);
         break;
 
+      case "isRecording":
+        try {
+          if (pitchService != null) {
+            boolean isRecording = pitchService.isRecording();
+            result.success(isRecording);
+          } else {
+            result.error("SERVICE_NOT_RUNNING", "Pitch detection service not running", null);
+          }
+        } catch (Exception e) {
+          result.error("GET_RECORDING_STATE_FAILED",
+                  "Failed to get recording state: " + e.getMessage(), null);
+        }
+        break;
+
+      case "getSampleRate":
+        try {
+          if (pitchService != null) {
+            sampleRate = pitchService.getSampleRate();
+            result.success(sampleRate);
+          } else {
+            result.error("SERVICE_NOT_RUNNING", "Pitch detection service not running", null);
+          }
+        } catch (Exception e) {
+          result.error("GET_SAMPLE_RATE_FAILED", "Failed to get sample rate: " + e.getMessage(), null);
+        }
+        break;
+
+      case "getBufferSize":
+        try {
+          if (pitchService != null) {
+            bufferSize = pitchService.getBufferSize();
+            result.success(bufferSize);
+          } else {
+            result.error("SERVICE_NOT_RUNNING", "Pitch detection service not running", null);
+          }
+        } catch (Exception e) {
+          result.error("GET_BUFFER_SIZE_FAILED", "Failed to get buffer size: " + e.getMessage(), null);
+        }
+        break;
+
+      case "getAccuracy":
+        try {
+          if (pitchService != null) {
+            float accuracy = pitchService.getAccuracy();
+            result.success(accuracy);
+          } else {
+            result.error("SERVICE_NOT_RUNNING", "Pitch detection service not running", null);
+          }
+        } catch (Exception e) {
+          result.error("GET_ACCURACY_FAILED", "Failed to get accuracy: " + e.getMessage(), null);
+        }
+        break;
+
       default:
         result.notImplemented();
     }

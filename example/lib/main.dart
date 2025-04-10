@@ -19,6 +19,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
   final _flutterPitchDetectionPlugin = FlutterPitchDetection();
+  bool isRecording = false;
 
   @override
   void initState() {
@@ -50,15 +51,58 @@ class _MyAppState extends State<MyApp> {
 
 
 
+  Widget _startButton(Size size) {
+    return SizedBox(
+      height: size.height*0.1,
+      width: size.width*0.1,
+      child: IconButton(
+        onPressed: () {
+          setState(() {
+            isRecording = !isRecording;
+          });
+        },
+        icon: Icon(
+          Icons.play_arrow_rounded,
+          color: Colors.black,
+        ),
+      ),
+    );
+  }
+
+  Widget _stopButton(Size size) {
+    return SizedBox(
+      height: size.height*0.1,
+      width: size.width*0.1,
+      child: IconButton(
+        onPressed: () {
+          setState(() {
+            isRecording = !isRecording;
+          });
+        },
+        icon: Icon(
+          Icons.stop_rounded,
+          color: Colors.black,
+        ),
+      ),
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
+
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Plugin - flutter_pitch_detection'),
+          title: const Text('Pitch Detection'),
         ),
         body: Center(
-          child: Text('Hello dev! :)'),
+          child: Column(
+            children: [
+              !isRecording? _startButton(size) : _stopButton(size),
+            ],
+          ),
         ),
       ),
     );
