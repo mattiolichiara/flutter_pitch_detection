@@ -9,6 +9,10 @@ void main() {
   runApp(const MyApp());
 }
 
+//TODO get decibels
+//TODO return pitch accuracy
+//TODO add isOnPitch
+
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
