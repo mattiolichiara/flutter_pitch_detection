@@ -19,9 +19,9 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final _flutterPitchDetectionPlugin = FlutterPitchDetection();
   StreamSubscription<Map<String, dynamic>>? _pitchSubscription;
-  String note = "ND";
+  String note = "";
   double frequency = 0;
-  String noteOctave = "ND";
+  String noteOctave = "";
   int octave = 0;
   double accuracy = 0;
   int bufferSize = 0;
@@ -83,9 +83,9 @@ class _MyAppState extends State<MyApp> {
 
   void resetValues() {
     setState(() {
-      note = "ND";
+      note = "";
       frequency = 0;
-      noteOctave = "ND";
+      noteOctave = "";
       octave = 0;
       accuracy = 0;
       bufferSize = 0;

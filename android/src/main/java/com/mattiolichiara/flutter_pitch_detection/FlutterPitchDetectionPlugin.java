@@ -11,18 +11,21 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import com.mattiolichiara.flutter_pitch_detection.*;
+import android.os.Handler;
+import android.os.Looper;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler {
-  private static final String CHANNEL = "pitch_detection";
+  private static final String CHANNEL = "pitch_detection/methods";
   private static final String EVENT_CHANNEL = "pitch_detection/events";
 
   private MethodChannel methodChannel;
   private EventChannel eventChannel;
   private EventChannel.EventSink eventSink;
   private PitchDetectionService pitchService;
+  private final Object sinkLock = new Object();
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
@@ -41,26 +44,22 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
 //        result.success("Android " + android.os.Build.VERSION.RELEASE);
 //        break;
 
-      case "start":
+      case "startDetection":
         int sampleRate = call.argument("sampleRate");
         int bufferSize = call.argument("bufferSize");
         int overlap = call.argument("overlap");
 
+        if (pitchService != null) {
+          pitchService.stopDetection();
+        }
+
         pitchService = new PitchDetectionService(
                 sampleRate != 0 ? sampleRate : 44100,
-                bufferSize != 0 ? bufferSize : 1024,
-                overlap != 0 ? overlap : 0,
-                (resultPitch, event) -> {
-                  if (eventSink != null) {
-                    Map<String, Object> pitchData = new HashMap<>();
-                    pitchData.put("pitch", resultPitch.getPitch());
-                    pitchData.put("probability", resultPitch.getProbability());
-                    pitchData.put("isPitched", resultPitch.isPitched());
-                    eventSink.success(pitchData);
-                  }
-                }
+                bufferSize != 0 ? bufferSize : 2048,
+                overlap != 0 ? overlap : 1024,
+                pitchHandler
         );
-        pitchService.start();
+        pitchService.startDetection();
         result.success(null);
         break;
 
@@ -129,9 +128,9 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
         }
         break;
 
-      case "stop":
+      case "stopDetection":
         if (pitchService != null) {
-          pitchService.stop();
+          pitchService.stopDetection();
         }
         result.success(null);
         break;
@@ -246,35 +245,42 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
     }
   }
 
+  private final PitchDetectionHandler pitchHandler = (pitchResult, audioEvent) -> {
+    float pitch = pitchResult.getPitch();
+    if (pitch <= 0) return;
+
+    new Handler(Looper.getMainLooper()).post(() -> {
+      synchronized (sinkLock) {
+        if (eventSink != null) {
+          int midi = pitchService.frequencyToMidi(pitch);
+          Map<String, Object> data = new HashMap<>();
+          data.put("frequency", pitch);
+          data.put("note", pitchService.midiToNoteName(midi));
+          data.put("octave", pitchService.midiToOctave(midi));
+          data.put("midi", midi);
+
+          eventSink.success(data);
+        }
+      }
+    });
+  };
+
   @Override
   public void onListen(Object arguments, EventChannel.EventSink events) {
-    this.eventSink = events;
+    synchronized (sinkLock) {
+      this.eventSink = events;
+    }
 
-    PitchDetectionHandler handler = (result, e) -> {
-      float pitch = result.getPitch();
-      if (pitch > 0 && eventSink != null) {
-        int midi = pitchService.frequencyToMidi(pitch);
-        String note = pitchService.midiToNoteName(midi);
-        int octave = pitchService.midiToOctave(midi);
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("frequency", pitch);
-        data.put("note", note);
-        data.put("octave", octave);
-        data.put("midi", midi);
-
-        eventSink.success(data);
-      }
-    };
-
-    pitchService = new PitchDetectionService(44100, 2048, 1024, handler);
-    pitchService.start();
+    if (pitchService == null) {
+      pitchService = new PitchDetectionService(44100, 2048, 1024, pitchHandler);
+      pitchService.startDetection();
+    }
   }
 
   @Override
   public void onCancel(Object arguments) {
     if (pitchService != null) {
-      pitchService.stop();
+      pitchService.stopDetection();
       pitchService = null;
     }
     eventSink = null;
@@ -282,6 +288,10 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
 
   @Override
   public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
+    if (pitchService != null) {
+      pitchService.stopDetection();
+      pitchService = null;
+    }
     methodChannel.setMethodCallHandler(null);
     eventChannel.setStreamHandler(null);
   }

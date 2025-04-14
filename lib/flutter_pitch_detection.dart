@@ -36,9 +36,9 @@ abstract class FlutterPitchDetectionPlatform extends PlatformInterface {
     return false;
   }
 
-  static Future<void> startDetection({
+  Future<void> startDetection({
     int sampleRate = 44100,
-    int bufferSize = 1024,
+    int bufferSize = 8192,
     int overlap = 0,
   }) async {
     final hasPermission = await _instance.requestMicrophonePermission();
@@ -46,15 +46,15 @@ abstract class FlutterPitchDetectionPlatform extends PlatformInterface {
       throw Exception('Microphone permission not granted');
     }
 
-    await FlutterPitchDetectionPlatform.startDetection(
+    await _instance.startDetection(
       sampleRate: sampleRate,
       bufferSize: bufferSize,
       overlap: overlap,
     );
   }
 
-  static Future<void> stopDetection() async {
-    await FlutterPitchDetectionPlatform.stopDetection();
+  Future<void> stopDetection() async {
+    await _instance.stopDetection();
   }
 
   // Future<String?> getPlatformVersion() {

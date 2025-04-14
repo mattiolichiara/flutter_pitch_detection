@@ -10,7 +10,7 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 class MockFlutterPitchDetectionPlatform with MockPlatformInterfaceMixin implements FlutterPitchDetectionPlatform {
   final StreamController<Map<String, dynamic>> _controller = StreamController.broadcast();
   int _sampleRate = 44100;
-  int _bufferSize = 1024;
+  int _bufferSize = 8192;
   double _accuracy = 0.8;
   bool _isRunning = false;
 
@@ -36,7 +36,7 @@ class MockFlutterPitchDetectionPlatform with MockPlatformInterfaceMixin implemen
   }
 
   @override
-  Future<void> startDetection({int sampleRate = 44100, int bufferSize = 1024, int overlap = 0}) async {
+  Future<void> startDetection({int sampleRate = 44100, int bufferSize = 8192, int overlap = 0}) async {
     _isRunning = true;
     _sampleRate = sampleRate;
     _bufferSize = bufferSize;

@@ -21,7 +21,7 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
   @override
   Future<void> startDetection({
     int sampleRate = 44100,
-    int bufferSize = 1024,
+    int bufferSize = 8192,
     int overlap = 0,
   }) async {
     try {

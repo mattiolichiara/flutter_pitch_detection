@@ -13,10 +13,10 @@ class FlutterPitchDetection {
 
   Future<void> startDetection({
     int sampleRate = 44100,
-    int bufferSize = 1024,
+    int bufferSize = 8192,
     int overlap = 0,
   }) async {
-    return FlutterPitchDetectionPlatform.startDetection(
+    return _platform.startDetection(
       sampleRate: sampleRate,
       bufferSize: bufferSize,
       overlap: overlap,
@@ -24,7 +24,7 @@ class FlutterPitchDetection {
   }
 
   Future<void> stopDetection() async {
-    return FlutterPitchDetectionPlatform.stopDetection();
+    return _platform.stopDetection();
   }
 
   Future<void> setParameters({

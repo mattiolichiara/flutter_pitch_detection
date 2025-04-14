@@ -30,11 +30,13 @@ public class PitchDetectionService {
     }
 
     protected int frequencyToMidi(float frequency) {
-        return Math.round(69 + 12 * (float)(Math.log(frequency / 440.0) / Math.log(2)));
+        if (frequency <= 0) return -1;
+        return (int) Math.round(69 + 12 * (Math.log(frequency / 440.0) / Math.log(2)));
     }
 
     protected String midiToNoteName(int midi) {
         String[] noteNames = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
+        if (midi < 0 || midi > 127) return "";
         return noteNames[midi % 12];
     }
 
@@ -93,24 +95,49 @@ public class PitchDetectionService {
         return accuracy;
     }
 
-    public void start() {
+    public synchronized void startDetection() {
         if (isRecording) return;
 
-        dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(
-                sampleRate, bufferSize, overlap);
+        try {
+            if (bufferSize < 7056) bufferSize = 8192;
 
-        dispatcher.addAudioProcessor(new PitchProcessor(
-                PitchProcessor.PitchEstimationAlgorithm.FFT_YIN,
-                sampleRate,
-                bufferSize,
-                pitchHandler
-        ));
+            dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(
+                    sampleRate,
+                    bufferSize,
+                    overlap
+            );
 
-        new Thread(dispatcher, "Audio Dispatcher").start();
-        isRecording = true;
+            dispatcher.addAudioProcessor(new PitchProcessor(
+                    PitchProcessor.PitchEstimationAlgorithm.FFT_YIN,
+                    sampleRate,
+                    bufferSize,
+                    (pitchResult, audioEvent) -> {
+                        float pitch = pitchResult.getPitch();
+                        if (pitch > 0 && pitchResult.getProbability() > 0.9) {
+                            synchronized (this) {
+                                currentFrequency = pitch;
+                                currentMidiNote = frequencyToMidi(pitch);
+                            }
+                        } else {
+                            synchronized (this) {
+                                currentFrequency = -1;
+                                currentMidiNote = -1;
+                            }
+                        }
+                        pitchHandler.handlePitch(pitchResult, audioEvent);
+                    }
+            ));
+
+            new Thread(dispatcher, "Audio Dispatcher").start();
+            isRecording = true;
+
+        } catch (Exception e) {
+            stopDetection();
+            throw new RuntimeException("Start failed: " + e.getMessage(), e);
+        }
     }
 
-    public synchronized void stop() {
+    public synchronized void stopDetection() {
         if (dispatcher != null && !dispatcher.isStopped()) {
             dispatcher.stop();
             isRecording = false;
