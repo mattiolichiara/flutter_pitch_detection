@@ -16,7 +16,7 @@ class FlutterPitchDetection {
     int bufferSize = 1024,
     int overlap = 0,
   }) async {
-    return _platform.startDetection(
+    return FlutterPitchDetectionPlatform.startDetection(
       sampleRate: sampleRate,
       bufferSize: bufferSize,
       overlap: overlap,
@@ -24,7 +24,7 @@ class FlutterPitchDetection {
   }
 
   Future<void> stopDetection() async {
-    return _platform.stopDetection();
+    return FlutterPitchDetectionPlatform.stopDetection();
   }
 
   Future<void> setParameters({
@@ -45,5 +45,37 @@ class FlutterPitchDetection {
 
   Future<void> setAccuracy(double accuracy) async {
     return _platform.setAccuracy(accuracy);
+  }
+
+  Future<int> getSampleRate() async {
+    return _platform.getSampleRate();
+  }
+
+  Future<int> getBufferSize() async {
+    return _platform.getBufferSize();
+  }
+
+  Future<double> getAccuracy() async {
+    return _platform.getAccuracy();
+  }
+
+  Future<bool> isRecording() async {
+    return _platform.isRecording();
+  }
+
+  Future<double> getFrequency() async {
+    return _platform.getFrequency();
+  }
+
+  Future<String> getNote() async {
+    return _platform.getNote();
+  }
+
+  Future<int> getOctave() async {
+    return _platform.getOctave();
+  }
+
+  Future<String> printNoteOctave() async {
+    return _platform.printNoteOctave();
   }
 }

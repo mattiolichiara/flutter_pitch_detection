@@ -10,9 +10,12 @@ public class PitchDetectionService {
     private int sampleRate;
     private int bufferSize;
     private int overlap;
-    private float accuracy = 1f;
+    private double accuracy = 1f;
     private boolean isRecording = false;
-    private boolean isPermissionGranted = false;
+    private double currentFrequency = -1f;
+    private int currentMidiNote = -1;
+
+
 
 //    public String getPlatformVersion() {
 //        return "Android " + android.os.Build.VERSION.RELEASE;
@@ -24,7 +27,37 @@ public class PitchDetectionService {
         this.bufferSize = bufferSize;
         this.overlap = overlap;
         this.pitchHandler = pitchHandler;
-        checkAudioPermission();
+    }
+
+    protected int frequencyToMidi(float frequency) {
+        return Math.round(69 + 12 * (float)(Math.log(frequency / 440.0) / Math.log(2)));
+    }
+
+    protected String midiToNoteName(int midi) {
+        String[] noteNames = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
+        return noteNames[midi % 12];
+    }
+
+    protected int midiToOctave(int midi) {
+        return (midi / 12) - 1;
+    }
+
+    public double getFrequency() {
+        return currentFrequency;
+    }
+
+    public String getNote() {
+        if (currentMidiNote == -1) return null;
+        return midiToNoteName(currentMidiNote);
+    }
+
+    public int getOctave() {
+        if (currentMidiNote == -1) return -1;
+        return midiToOctave(currentMidiNote);
+    }
+
+    public String printNoteOctave() {
+        return getNote() + "" + getOctave();
     }
 
     public void setParameters(int sampleRate, int bufferSize, float accuracy) {
@@ -56,31 +89,13 @@ public class PitchDetectionService {
         return bufferSize;
     }
 
-    public float getAccuracy() {
+    public double getAccuracy() {
         return accuracy;
     }
 
-    private void checkAudioPermission() {
-        if (ContextCompat.checkSelfPermission(context,
-                Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-            isPermissionGranted = true;
-        } else {
-            if (context instanceof Activity) {
-                ActivityCompat.requestPermissions((Activity) context,
-                        new String[]{Manifest.permission.RECORD_AUDIO},
-                        AUDIO_PERMISSION_REQUEST_CODE);
-            }
-        }
-    }
-
-    public void handlePermissionResult(int requestCode, int[] grantResults) {
-        if (requestCode == AUDIO_PERMISSION_REQUEST_CODE) {
-            isPermissionGranted = grantResults.length > 0 &&
-                    grantResults[0] == PackageManager.PERMISSION_GRANTED;
-        }
-    }
-
     public void start() {
+        if (isRecording) return;
+
         dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(
                 sampleRate, bufferSize, overlap);
 
@@ -95,7 +110,7 @@ public class PitchDetectionService {
         isRecording = true;
     }
 
-    public void stop() {
+    public synchronized void stop() {
         if (dispatcher != null && !dispatcher.isStopped()) {
             dispatcher.stop();
             isRecording = false;

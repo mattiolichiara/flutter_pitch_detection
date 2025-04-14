@@ -9,6 +9,7 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
+import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import com.mattiolichiara.flutter_pitch_detection.*;
 
 import java.util.HashMap;
@@ -178,13 +179,65 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
       case "getAccuracy":
         try {
           if (pitchService != null) {
-            float accuracy = pitchService.getAccuracy();
+            double accuracy = pitchService.getAccuracy();
             result.success(accuracy);
           } else {
             result.error("SERVICE_NOT_RUNNING", "Pitch detection service not running", null);
           }
         } catch (Exception e) {
           result.error("GET_ACCURACY_FAILED", "Failed to get accuracy: " + e.getMessage(), null);
+        }
+        break;
+
+      case "getFrequency":
+        try {
+          if (pitchService != null) {
+            double frequency = pitchService.getFrequency();
+            result.success(frequency);
+          } else {
+            result.error("SERVICE_NOT_RUNNING", "Pitch detection service not running", null);
+          }
+        } catch (Exception e) {
+          result.error("GET_FREQUENCY_FAILED", "Failed to get frequency: " + e.getMessage(), null);
+        }
+        break;
+
+      case "getNote":
+        try {
+          if (pitchService != null) {
+            String note = pitchService.getNote();
+            result.success(note);
+          } else {
+            result.error("SERVICE_NOT_RUNNING", "Pitch detection service not running", null);
+          }
+        } catch (Exception e) {
+          result.error("GET_NOTE_FAILED", "Failed to get note: " + e.getMessage(), null);
+        }
+        break;
+
+      case "getOctave":
+        try {
+          if (pitchService != null) {
+            int octave = pitchService.getOctave();
+            result.success(octave);
+          } else {
+            result.error("SERVICE_NOT_RUNNING", "Pitch detection service not running", null);
+          }
+        } catch (Exception e) {
+          result.error("GET_OCTAVE_FAILED", "Failed to get octave: " + e.getMessage(), null);
+        }
+        break;
+
+      case "printNoteOctave":
+        try {
+          if (pitchService != null) {
+            String noteOctave = pitchService.printNoteOctave();
+            result.success(noteOctave);
+          } else {
+            result.error("SERVICE_NOT_RUNNING", "Pitch detection service not running", null);
+          }
+        } catch (Exception e) {
+          result.error("GET_NOTE_OCTAVE_FAILED", "Failed to get note and octave: " + e.getMessage(), null);
         }
         break;
 
@@ -195,15 +248,36 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
 
   @Override
   public void onListen(Object arguments, EventChannel.EventSink events) {
-    eventSink = events;
+    this.eventSink = events;
+
+    PitchDetectionHandler handler = (result, e) -> {
+      float pitch = result.getPitch();
+      if (pitch > 0 && eventSink != null) {
+        int midi = pitchService.frequencyToMidi(pitch);
+        String note = pitchService.midiToNoteName(midi);
+        int octave = pitchService.midiToOctave(midi);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("frequency", pitch);
+        data.put("note", note);
+        data.put("octave", octave);
+        data.put("midi", midi);
+
+        eventSink.success(data);
+      }
+    };
+
+    pitchService = new PitchDetectionService(44100, 2048, 1024, handler);
+    pitchService.start();
   }
 
   @Override
   public void onCancel(Object arguments) {
-    eventSink = null;
     if (pitchService != null) {
       pitchService.stop();
+      pitchService = null;
     }
+    eventSink = null;
   }
 
   @Override

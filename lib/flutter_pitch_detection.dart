@@ -1,5 +1,5 @@
-import 'package:flutter/services.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'flutter_pitch_detection_method_channel.dart';
 
@@ -18,13 +18,44 @@ abstract class FlutterPitchDetectionPlatform extends PlatformInterface {
 
   Stream<Map<String, dynamic>> get onPitchDetected;
 
-  Future<void> startDetection({
+  Future<bool> requestMicrophonePermission() async {
+    var status = await Permission.microphone.status;
+
+    if (status.isGranted) {
+      return true;
+    } else if (status.isDenied || status.isRestricted || status.isLimited) {
+      final result = await Permission.microphone.request();
+      return result.isGranted;
+    }
+
+    if (status.isPermanentlyDenied) {
+      await openAppSettings();
+      return false;
+    }
+
+    return false;
+  }
+
+  static Future<void> startDetection({
     int sampleRate = 44100,
     int bufferSize = 1024,
     int overlap = 0,
-  });
+  }) async {
+    final hasPermission = await _instance.requestMicrophonePermission();
+    if (!hasPermission) {
+      throw Exception('Microphone permission not granted');
+    }
 
-  Future<void> stopDetection();
+    await FlutterPitchDetectionPlatform.startDetection(
+      sampleRate: sampleRate,
+      bufferSize: bufferSize,
+      overlap: overlap,
+    );
+  }
+
+  static Future<void> stopDetection() async {
+    await FlutterPitchDetectionPlatform.stopDetection();
+  }
 
   // Future<String?> getPlatformVersion() {
   //   return FlutterPitchDetectionPlatform.instance.getPlatformVersion();
@@ -52,5 +83,37 @@ abstract class FlutterPitchDetectionPlatform extends PlatformInterface {
 
   Future<void> setAccuracy(double accuracy) async {
     await FlutterPitchDetectionPlatform.instance.setAccuracy(accuracy);
+  }
+
+  Future<int> getSampleRate() async {
+    return await FlutterPitchDetectionPlatform.instance.getSampleRate();
+  }
+
+  Future<int> getBufferSize() async {
+    return await FlutterPitchDetectionPlatform.instance.getBufferSize();
+  }
+
+  Future<double> getAccuracy() async {
+    return await FlutterPitchDetectionPlatform.instance.getAccuracy();
+  }
+
+  Future<bool> isRecording() async {
+    return await FlutterPitchDetectionPlatform.instance.isRecording();
+  }
+
+  Future<double> getFrequency() async {
+    return await FlutterPitchDetectionPlatform.instance.getFrequency();
+  }
+
+  Future<String> getNote() async {
+    return await FlutterPitchDetectionPlatform.instance.getNote();
+  }
+
+  Future<int> getOctave() async {
+    return await FlutterPitchDetectionPlatform.instance.getOctave();
+  }
+
+  Future<String> printNoteOctave() async {
+    return await FlutterPitchDetectionPlatform.instance.printNoteOctave();
   }
 }

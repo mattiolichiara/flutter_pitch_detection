@@ -17,8 +17,15 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
   final _flutterPitchDetectionPlugin = FlutterPitchDetection();
+  StreamSubscription<Map<String, dynamic>>? _pitchSubscription;
+  String note = "ND";
+  double frequency = 0;
+  String noteOctave = "ND";
+  int octave = 0;
+  double accuracy = 0;
+  int bufferSize = 0;
+  int sampleRate = 0;
   bool isRecording = false;
 
   @override
@@ -27,40 +34,72 @@ class _MyAppState extends State<MyApp> {
     //initPlatformState();
   }
 
-  // // Platform messages are asynchronous, so we initialize in an async method.
-  // Future<void> initPlatformState() async {
-  //   String platformVersion;
-  //   // Platform messages may fail, so we use a try/catch PlatformException.
-  //   // We also handle the message potentially returning null.
-  //   try {
-  //     platformVersion =
-  //         await _flutterPitchDetectionPlugin.getPlatformVersion() ?? 'Unknown platform version';
-  //   } on PlatformException {
-  //     platformVersion = 'Failed to get platform version.';
-  //   }
-  //
-  //   // If the widget was removed from the tree while the asynchronous platform
-  //   // message was in flight, we want to discard the reply rather than calling
-  //   // setState to update our non-existent appearance.
-  //   if (!mounted) return;
-  //
-  //   setState(() {
-  //     _platformVersion = platformVersion;
-  //   });
-  // }
+  void onStartPressed() async {
+    setState(() {
+      isRecording = true;
+    });
 
+    await _flutterPitchDetectionPlugin.startDetection();
+    // bool currentRecording = await _flutterPitchDetectionPlugin.isRecording();
+    // debugPrint("[START] Is Recording: $currentRecording");
 
+    _pitchSubscription = FlutterPitchDetectionPlatform.instance.onPitchDetected.listen((event) async {
+      debugPrint("Stream on");
+
+      final newNote = await _flutterPitchDetectionPlugin.getNote();
+      final newFrequency = await _flutterPitchDetectionPlugin.getFrequency();
+      final newNoteOctave = await _flutterPitchDetectionPlugin.printNoteOctave();
+      final newOctave = await _flutterPitchDetectionPlugin.getOctave();
+      final newAccuracy = await _flutterPitchDetectionPlugin.getAccuracy();
+      final newBufferSize = await _flutterPitchDetectionPlugin.getBufferSize();
+      final newSampleRate = await _flutterPitchDetectionPlugin.getSampleRate();
+      final newIsRecording = await _flutterPitchDetectionPlugin.isRecording();
+
+      setState(() {
+        note = newNote;
+        frequency = newFrequency;
+        noteOctave = newNoteOctave;
+        octave = newOctave;
+        accuracy = newAccuracy;
+        bufferSize = newBufferSize;
+        sampleRate = newSampleRate;
+        isRecording = newIsRecording;
+      });
+    });
+  }
+
+  void onStopPressed() async {
+    setState(() {
+      isRecording = false;
+    });
+
+    await _flutterPitchDetectionPlugin.stopDetection();
+    debugPrint("[STOP] Is Recording: ${_flutterPitchDetectionPlugin.isRecording()}");
+
+    await _pitchSubscription?.cancel();
+    _pitchSubscription = null;
+    resetValues();
+  }
+
+  void resetValues() {
+    setState(() {
+      note = "ND";
+      frequency = 0;
+      noteOctave = "ND";
+      octave = 0;
+      accuracy = 0;
+      bufferSize = 0;
+      sampleRate = 0;
+      isRecording = false;
+    });
+  }
 
   Widget _startButton(Size size) {
     return SizedBox(
       height: size.height*0.1,
       width: size.width*0.1,
       child: IconButton(
-        onPressed: () {
-          setState(() {
-            isRecording = !isRecording;
-          });
-        },
+        onPressed: onStartPressed,
         icon: Icon(
           Icons.play_arrow_rounded,
           color: Colors.black,
@@ -74,11 +113,7 @@ class _MyAppState extends State<MyApp> {
       height: size.height*0.1,
       width: size.width*0.1,
       child: IconButton(
-        onPressed: () {
-          setState(() {
-            isRecording = !isRecording;
-          });
-        },
+        onPressed: onStopPressed,
         icon: Icon(
           Icons.stop_rounded,
           color: Colors.black,
@@ -86,7 +121,6 @@ class _MyAppState extends State<MyApp> {
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +134,17 @@ class _MyAppState extends State<MyApp> {
         body: Center(
           child: Column(
             children: [
-              !isRecording? _startButton(size) : _stopButton(size),
+              SizedBox(height: size.height * 0.3),
+              Text("Note-Octave: $noteOctave", style: TextStyle(fontSize: 20)),
+              Text("Note: $note", style: TextStyle(fontSize: 18)),
+              Text("Octave: $octave", style: TextStyle(fontSize: 18)),
+              Text("Frequency: ${frequency.toStringAsFixed(2)} Hz", style: TextStyle(fontSize: 18)),
+              Text("Accuracy: ${accuracy.toStringAsFixed(2)} Hz", style: TextStyle(fontSize: 18)),
+              Text("IsRecording: $isRecording", style: TextStyle(fontSize: 16)),
+              Text("BufferSize: $bufferSize", style: TextStyle(fontSize: 16)),
+              Text("SampleRate: $sampleRate", style: TextStyle(fontSize: 16)),
+              SizedBox(height: size.height * 0.1),
+              isRecording ? _stopButton(size) : _startButton(size),
             ],
           ),
         ),

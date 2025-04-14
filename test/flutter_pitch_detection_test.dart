@@ -41,7 +41,6 @@ class MockFlutterPitchDetectionPlatform with MockPlatformInterfaceMixin implemen
     _sampleRate = sampleRate;
     _bufferSize = bufferSize;
 
-    // Simulate periodic pitch updates
     Timer.periodic(Duration(milliseconds: 100), (timer) {
       if (!_isRunning) {
         timer.cancel();
@@ -76,10 +75,59 @@ class MockFlutterPitchDetectionPlatform with MockPlatformInterfaceMixin implemen
       'isPitched': probability > 0.8
     });
   }
+
+  @override
+  Future<double> getAccuracy() async {
+    return _accuracy;
+  }
+
+  @override
+  Future<int> getBufferSize() async {
+    return _bufferSize;
+  }
+
+  @override
+  Future<int> getSampleRate() async {
+    return _sampleRate;
+  }
+
+  @override
+  Future<bool> isRecording() async {
+    return _isRunning;
+  }
+
+  @override
+  Future<double> getFrequency() {
+    // TODO: implement getFrequency
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<String> getNote() {
+    // TODO: implement getNote
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<int> getOctave() {
+    // TODO: implement getOctave
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<String> printNoteOctave() {
+    // TODO: implement printNoteOctave
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> requestMicrophonePermission() {
+    // TODO: implement requestMicrophonePermission
+    throw UnimplementedError();
+  }
 }
 
 void main() {
-  // Initialize binding BEFORE ANY TESTS RUN
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('MethodChannelFlutterPitchDetection', () {

@@ -99,4 +99,76 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
       throw Exception('Failed to set accuracy: ${e.message}');
     }
   }
+  
+  @override
+  Future<int> getSampleRate() async {
+    try {
+      return await _methodChannel.invokeMethod('getSampleRate');
+    } on PlatformException catch(e) {
+      throw Exception("Sample Rate Read Error: ${e.message}");
+    }
+  }
+
+  @override
+  Future<int> getBufferSize() async {
+    try {
+      return await _methodChannel.invokeMethod('getBufferSize');
+    } on PlatformException catch(e) {
+      throw Exception("Buffer Size Read Error: ${e.message}");
+    }
+  }
+
+  @override
+  Future<double> getAccuracy() async {
+    try {
+      return await _methodChannel.invokeMethod('getAccuracy');
+    } on PlatformException catch(e) {
+      throw Exception("Accuracy Read Error: ${e.message}");
+    }
+  }
+
+  @override
+  Future<bool> isRecording() async {
+    try {
+      return await _methodChannel.invokeMethod('isRecording');
+    } on PlatformException catch(e) {
+      throw Exception("Error Retrieving Recording Status: ${e.message}");
+    }
+  }
+
+  @override
+  Future<double> getFrequency() async {
+    try {
+      return await _methodChannel.invokeMethod('getFrequency');
+    } on PlatformException catch(e) {
+      throw Exception("Error Retrieving Frequency: ${e.message}");
+    }
+  }
+
+  @override
+  Future<String> getNote() async {
+    try {
+      return await _methodChannel.invokeMethod('getNote');
+    } on PlatformException catch(e) {
+      throw Exception("Error Retrieving Current Note: ${e.message}");
+    }
+  }
+
+  @override
+  Future<int> getOctave() async {
+    try {
+      return await _methodChannel.invokeMethod('getOctave');
+    } on PlatformException catch(e) {
+      throw Exception("Error Retrieving Octave: ${e.message}");
+    }
+  }
+
+  @override
+  Future<String> printNoteOctave() async {
+    try {
+      return await _methodChannel.invokeMethod('printNoteOctave');
+    } on PlatformException catch(e) {
+      throw Exception("Error Retrieving Note-Octave Full Value: ${e.message}");
+    }
+  }
 }
