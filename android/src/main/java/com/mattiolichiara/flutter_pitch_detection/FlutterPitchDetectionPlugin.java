@@ -68,7 +68,7 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
           int newSampleRate = call.argument("sampleRate");
           int newBufferSize = call.argument("bufferSize");
           int newOverlap = call.argument("overlap");
-          float newAccuracy = call.argument("accuracy") != null ?
+          double newAccuracy = call.argument("accuracy") != null ?
                   ((Double) call.argument("accuracy")).floatValue() : 0.8f;
 
           if (pitchService != null) {
@@ -116,7 +116,7 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
 
       case "setAccuracy":
         try {
-          float newAccuracy = call.argument("accuracy");
+          double newAccuracy = call.argument("accuracy");
           if (pitchService != null) {
             pitchService.setAccuracy(
                     newAccuracy != 0.0f ? newAccuracy : 1.0f

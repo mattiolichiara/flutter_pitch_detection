@@ -20,9 +20,9 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
 
   @override
   Future<void> startDetection({
-    int sampleRate = 44100,
-    int bufferSize = 8192,
-    int overlap = 0,
+    int? sampleRate,
+    int? bufferSize,
+    int? overlap,
   }) async {
     try {
       await _methodChannel.invokeMethod('startDetection', {
@@ -148,7 +148,8 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
   @override
   Future<String> getNote() async {
     try {
-      return await _methodChannel.invokeMethod('getNote');
+      final result = await _methodChannel.invokeMethod('getNote');
+      return result ?? "N0";
     } on PlatformException catch(e) {
       throw Exception("Error Retrieving Current Note: ${e.message}");
     }

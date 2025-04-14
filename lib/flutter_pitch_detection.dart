@@ -37,9 +37,9 @@ abstract class FlutterPitchDetectionPlatform extends PlatformInterface {
   }
 
   Future<void> startDetection({
-    int sampleRate = 44100,
-    int bufferSize = 8192,
-    int overlap = 0,
+    int? sampleRate,
+    int? bufferSize,
+    int? overlap,
   }) async {
     final hasPermission = await _instance.requestMicrophonePermission();
     if (!hasPermission) {

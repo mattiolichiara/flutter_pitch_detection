@@ -19,9 +19,9 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final _flutterPitchDetectionPlugin = FlutterPitchDetection();
   StreamSubscription<Map<String, dynamic>>? _pitchSubscription;
-  String note = "";
+  String note = "N";
   double frequency = 0;
-  String noteOctave = "";
+  String noteOctave = "N0";
   int octave = 0;
   double accuracy = 0;
   int bufferSize = 0;
@@ -40,11 +40,16 @@ class _MyAppState extends State<MyApp> {
     });
 
     await _flutterPitchDetectionPlugin.startDetection();
-    // bool currentRecording = await _flutterPitchDetectionPlugin.isRecording();
-    // debugPrint("[START] Is Recording: $currentRecording");
+    bool rec = await _flutterPitchDetectionPlugin.isRecording();
+    debugPrint("[START] Is Recording: $rec");
+
+    _flutterPitchDetectionPlugin.setAccuracy(0.98);
+    _flutterPitchDetectionPlugin.setBufferSize(8192);
+    _flutterPitchDetectionPlugin.setSampleRate(44100);
+    //_flutterPitchDetectionPlugin.setParameters(accuracy: 0.5, bufferSize: 8192, sampleRate: 44100);
 
     _pitchSubscription = FlutterPitchDetectionPlatform.instance.onPitchDetected.listen((event) async {
-      debugPrint("Stream on");
+      //debugPrint("Stream on");
 
       final newNote = await _flutterPitchDetectionPlugin.getNote();
       final newFrequency = await _flutterPitchDetectionPlugin.getFrequency();
@@ -74,7 +79,8 @@ class _MyAppState extends State<MyApp> {
     });
 
     await _flutterPitchDetectionPlugin.stopDetection();
-    debugPrint("[STOP] Is Recording: ${_flutterPitchDetectionPlugin.isRecording()}");
+    bool rec = await _flutterPitchDetectionPlugin.isRecording();
+    debugPrint("[STOP] Is Recording: $rec");
 
     await _pitchSubscription?.cancel();
     _pitchSubscription = null;
@@ -83,9 +89,9 @@ class _MyAppState extends State<MyApp> {
 
   void resetValues() {
     setState(() {
-      note = "";
+      note = "N";
       frequency = 0;
-      noteOctave = "";
+      noteOctave = "N0";
       octave = 0;
       accuracy = 0;
       bufferSize = 0;

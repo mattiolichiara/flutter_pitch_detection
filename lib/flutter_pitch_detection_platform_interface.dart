@@ -12,14 +12,14 @@ class FlutterPitchDetection {
   // }
 
   Future<void> startDetection({
-    int sampleRate = 44100,
-    int bufferSize = 8192,
-    int overlap = 0,
+    int? sampleRate,
+    int? bufferSize,
+    int? overlap,
   }) async {
     return _platform.startDetection(
-      sampleRate: sampleRate,
-      bufferSize: bufferSize,
-      overlap: overlap,
+      sampleRate: sampleRate ?? 44100,
+      bufferSize: bufferSize ?? 8192,
+      overlap: overlap ?? 0,
     );
   }
 

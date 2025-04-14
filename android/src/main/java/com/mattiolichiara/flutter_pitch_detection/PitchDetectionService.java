@@ -36,7 +36,7 @@ public class PitchDetectionService {
 
     protected String midiToNoteName(int midi) {
         String[] noteNames = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
-        if (midi < 0 || midi > 127) return "";
+        if (midi < 0 || midi > 127) return "N";
         return noteNames[midi % 12];
     }
 
@@ -49,7 +49,7 @@ public class PitchDetectionService {
     }
 
     public String getNote() {
-        if (currentMidiNote == -1) return null;
+        if (currentMidiNote == -1) return "N";
         return midiToNoteName(currentMidiNote);
     }
 
@@ -62,7 +62,7 @@ public class PitchDetectionService {
         return getNote() + "" + getOctave();
     }
 
-    public void setParameters(int sampleRate, int bufferSize, float accuracy) {
+    public void setParameters(int sampleRate, int bufferSize, double accuracy) {
         this.sampleRate = sampleRate;
         this.bufferSize = bufferSize;
         this.accuracy = accuracy;
@@ -76,7 +76,7 @@ public class PitchDetectionService {
         this.bufferSize = bufferSize;
     }
 
-    public void setAccuracy(float accuracy) {
+    public void setAccuracy(double accuracy) {
         this.accuracy = accuracy;
     }
     public boolean isRecording() {
