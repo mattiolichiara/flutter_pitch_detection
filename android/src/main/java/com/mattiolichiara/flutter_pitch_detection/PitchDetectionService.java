@@ -10,24 +10,63 @@ public class PitchDetectionService {
     private int sampleRate;
     private int bufferSize;
     private int overlap;
-    private double accuracy = 1f;
+    private double toleranceCents = 1f;
     private boolean isRecording = false;
     private double currentFrequency = -1f;
     private int currentMidiNote = -1;
     private double decibels = 0;
-
-
+    private double minPrecision = 0.85;
+    private double lastPitchProbability = 0.0;
 
 //    public String getPlatformVersion() {
 //        return "Android " + android.os.Build.VERSION.RELEASE;
 //    }
 
-    public PitchDetectionService(int sampleRate, int bufferSize, int overlap,
+    public PitchDetectionService(int sampleRate, int bufferSize, int overlap, double toleranceCents, double minPrecision,
                                  PitchDetectionHandler pitchHandler) {
         this.sampleRate = sampleRate;
         this.bufferSize = bufferSize;
         this.overlap = overlap;
+        this.toleranceCents = toleranceCents;
+        this.minPrecision = minPrecision;
+        this.lastPitchProbability = 0.0;
         this.pitchHandler = pitchHandler;
+    }
+
+    public int getAccuracy(double toleranceCents) {
+        if (currentFrequency <= 0 || currentMidiNote == -1) return 0;
+
+        double targetFrequency = 440.0 * Math.pow(2, (currentMidiNote - 69) / 12.0);
+
+        double maxCents = toleranceCents * 100;
+
+        double ratio = currentFrequency / targetFrequency;
+        double centsDeviation = Math.abs(1200 * Math.log10(ratio) / Math.log10(2));
+
+        if (centsDeviation >= maxCents) {
+            return 0;
+        }
+
+        return (int) Math.round(100 * (1 - (centsDeviation / maxCents)));
+    }
+
+    public boolean isOnPitch(double toleranceCents, double minPrecision) {
+        if (currentFrequency <= 0 || currentMidiNote == -1) return false;
+
+        double targetFrequency = 440.0 * Math.pow(2, (currentMidiNote - 69) / 12.0);
+
+        double maxCents = toleranceCents * 100;
+
+        double ratio = currentFrequency / targetFrequency;
+        double centsDeviation = Math.abs(1200 * Math.log10(ratio) / Math.log10(2));
+
+        double currentPrecision = 1 - (centsDeviation / maxCents);
+
+        return currentPrecision >= minPrecision;
+    }
+
+    private double midiToFrequency(int midiNote) {
+        return 440.0 * Math.pow(2, (midiNote - 69) / 12.0);
     }
 
     protected int frequencyToMidi(float frequency) {
@@ -83,10 +122,12 @@ public class PitchDetectionService {
         return getNote() + "" + getOctave();
     }
 
-    public void setParameters(int sampleRate, int bufferSize, double accuracy) {
+    public void setParameters(int sampleRate, int bufferSize, double toleranceCents,
+                              double minPrecision) {
         this.sampleRate = sampleRate;
         this.bufferSize = bufferSize;
-        this.accuracy = accuracy;
+        this.toleranceCents = toleranceCents;
+        this.minPrecision = minPrecision;
     }
 
     public void setSampleRate(int sampleRate) {
@@ -97,8 +138,15 @@ public class PitchDetectionService {
         this.bufferSize = bufferSize;
     }
 
-    public void setAccuracy(double accuracy) {
-        this.accuracy = accuracy;
+    public void setToleranceCents(double toleranceCents) {
+        this.toleranceCents = toleranceCents;
+    }
+
+    public void setMinPrecision(double minPrecision) {
+        if (minPrecision < 0 || minPrecision > 1) {
+            throw new IllegalArgumentException("minPrecision must be between 0 and 1");
+        }
+        this.minPrecision = minPrecision;
     }
     public boolean isRecording() {
         return isRecording;
@@ -112,8 +160,12 @@ public class PitchDetectionService {
         return bufferSize;
     }
 
-    public double getAccuracy() {
-        return accuracy;
+    public double getToleranceCents() {
+        return toleranceCents;
+    }
+
+    public double getMinPrecision() {
+        return minPrecision;
     }
 
     public double getDecibels() {
@@ -138,15 +190,19 @@ public class PitchDetectionService {
                     bufferSize,
                     (pitchResult, audioEvent) -> {
                         float pitch = pitchResult.getPitch();
-                        if (pitch > 0 && pitchResult.getProbability() > 0.9) {
+                        float probability = pitchResult.getProbability();
+
+                        if (pitch > 0 && probability >= minPrecision) {
                             synchronized (this) {
                                 currentFrequency = pitch;
                                 currentMidiNote = frequencyToMidi(pitch);
+                                lastPitchProbability = probability; // Store for later use
                             }
                         } else {
                             synchronized (this) {
                                 currentFrequency = -1;
                                 currentMidiNote = -1;
+                                lastPitchProbability = 0;
                             }
                         }
                         pitchHandler.handlePitch(pitchResult, audioEvent);

@@ -54,13 +54,15 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
   Future<void> setParameters({
     int? sampleRate,
     int? bufferSize,
-    double? accuracy,
+    double? toleranceCents,
+    double? minPrecision,
   }) async {
     try {
       await _methodChannel.invokeMethod('setParameters', {
         if (sampleRate != null) 'sampleRate': sampleRate,
         if (bufferSize != null) 'bufferSize': bufferSize,
-        if (accuracy != null) 'accuracy': accuracy,
+        if (toleranceCents != null) 'toleranceCents': toleranceCents,
+        if (minPrecision != null) 'minPrecision': minPrecision,
       });
     } on PlatformException catch (e) {
       throw Exception('Failed to set parameters: ${e.message}');
@@ -88,17 +90,6 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
       throw Exception('Failed to set buffer size: ${e.message}');
     }
   }
-
-  @override
-  Future<void> setAccuracy(double accuracy) async {
-    try {
-      await _methodChannel.invokeMethod('setAccuracy', {
-        'accuracy': accuracy,
-      });
-    } on PlatformException catch (e) {
-      throw Exception('Failed to set accuracy: ${e.message}');
-    }
-  }
   
   @override
   Future<int> getSampleRate() async {
@@ -115,15 +106,6 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
       return await _methodChannel.invokeMethod('getBufferSize');
     } on PlatformException catch(e) {
       throw Exception("Buffer Size Read Error: ${e.message}");
-    }
-  }
-
-  @override
-  Future<double> getAccuracy() async {
-    try {
-      return await _methodChannel.invokeMethod('getAccuracy');
-    } on PlatformException catch(e) {
-      throw Exception("Accuracy Read Error: ${e.message}");
     }
   }
 
@@ -179,6 +161,67 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
       return await _methodChannel.invokeMethod('getDecibels');
     } on PlatformException catch(e) {
       throw Exception("Error Retrieving Decibels Value: ${e.message}");
+    }
+  }
+
+  @override
+  Future<bool> isOnPitch(double toleranceCents, double minPrecision) async {
+    try {
+      return await _methodChannel.invokeMethod('isOnPitch', {'toleranceCents': toleranceCents, 'minPrecision': minPrecision},);
+    } on PlatformException catch (e) {
+      throw Exception("Failed to check pitch: ${e.message}");
+    }
+  }
+
+  @override
+  Future<int> getAccuracy(double toleranceCents) async {
+    try {
+      final result = await _methodChannel.invokeMethod<int>('getAccuracy', {
+        'toleranceCents': toleranceCents,
+      });
+      return result ?? 0;
+    } on PlatformException catch (e) {
+      throw Exception("Failed to get accuracy: ${e.message}");
+    }
+  }
+
+  @override
+  Future<void> setMinPrecision(double minPrecision) async {
+    try {
+      await _methodChannel.invokeMethod('setMinPrecision', {
+        'setMinPrecision': setMinPrecision,
+      });
+    } on PlatformException catch (e) {
+      throw Exception('Failed to set min precision: ${e.message}');
+    }
+  }
+
+  @override
+  Future<double> getMinPrecision() async {
+    try {
+      return await _methodChannel.invokeMethod('getMinPrecision');
+    } on PlatformException catch(e) {
+      throw Exception("Error Retrieving Min Precision Value: ${e.message}");
+    }
+  }
+
+  @override
+  Future<double> getToleranceCents() async {
+    try {
+      return await _methodChannel.invokeMethod('getToleranceCents');
+    } on PlatformException catch(e) {
+      throw Exception("Tolerance Hz Read Error: ${e.message}");
+    }
+  }
+
+  @override
+  Future<void> setToleranceCents(double toleranceCents) async {
+    try {
+      await _methodChannel.invokeMethod('setToleranceCents', {
+        'toleranceCents': toleranceCents,
+      });
+    } on PlatformException catch (e) {
+      throw Exception('Failed to set toleranceCents: ${e.message}');
     }
   }
 }

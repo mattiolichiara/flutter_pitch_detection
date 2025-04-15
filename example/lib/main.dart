@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -28,11 +30,14 @@ class _MyAppState extends State<MyApp> {
   double frequency = 0;
   String noteOctave = "N0";
   int octave = 0;
-  double accuracy = 0;
+  double toleranceCents = 0;
   int bufferSize = 0;
   int sampleRate = 0;
   bool isRecording = false;
   double decibels = 0;
+  bool isOnPitch = false;
+  int accuracy = 0;
+  double minPrecision = 0;
 
   @override
   void initState() {
@@ -49,10 +54,10 @@ class _MyAppState extends State<MyApp> {
     bool rec = await _flutterPitchDetectionPlugin.isRecording();
     debugPrint("[START] Is Recording: $rec");
 
-    _flutterPitchDetectionPlugin.setAccuracy(0.98);
+    _flutterPitchDetectionPlugin.setToleranceCents(0.9);
     _flutterPitchDetectionPlugin.setBufferSize(8192);
     _flutterPitchDetectionPlugin.setSampleRate(44100);
-    //_flutterPitchDetectionPlugin.setParameters(accuracy: 0.5, bufferSize: 8192, sampleRate: 44100);
+    _flutterPitchDetectionPlugin.setParameters(toleranceCents: 0.6, bufferSize: 8192, sampleRate: 44100, minPrecision: 0.7);
 
     _pitchSubscription = FlutterPitchDetectionPlatform.instance.onPitchDetected.listen((event) async {
       //debugPrint("Stream on");
@@ -61,22 +66,28 @@ class _MyAppState extends State<MyApp> {
       final newFrequency = await _flutterPitchDetectionPlugin.getFrequency();
       final newNoteOctave = await _flutterPitchDetectionPlugin.printNoteOctave();
       final newOctave = await _flutterPitchDetectionPlugin.getOctave();
-      final newAccuracy = await _flutterPitchDetectionPlugin.getAccuracy();
+      final newToleranceCents = await _flutterPitchDetectionPlugin.getToleranceCents();
       final newDecibels = await _flutterPitchDetectionPlugin.getDecibels();
       final newBufferSize = await _flutterPitchDetectionPlugin.getBufferSize();
       final newSampleRate = await _flutterPitchDetectionPlugin.getSampleRate();
       final newIsRecording = await _flutterPitchDetectionPlugin.isRecording();
+      final newMinPrecision = await _flutterPitchDetectionPlugin.getMinPrecision();
+      final newAccuracy = await _flutterPitchDetectionPlugin.getAccuracy(toleranceCents);
+      final newIsOnPitch = await _flutterPitchDetectionPlugin.isOnPitch(toleranceCents, minPrecision);
 
       setState(() {
         note = newNote;
         frequency = newFrequency;
         noteOctave = newNoteOctave;
         octave = newOctave;
-        accuracy = newAccuracy;
+        toleranceCents = newToleranceCents;
         bufferSize = newBufferSize;
         sampleRate = newSampleRate;
         isRecording = newIsRecording;
         decibels = newDecibels;
+        accuracy = newAccuracy;
+        minPrecision = newMinPrecision;
+        isOnPitch = newIsOnPitch;
       });
     });
   }
@@ -101,10 +112,12 @@ class _MyAppState extends State<MyApp> {
       frequency = 0;
       noteOctave = "N0";
       octave = 0;
-      accuracy = 0;
+      toleranceCents = 0;
       bufferSize = 0;
       sampleRate = 0;
       isRecording = false;
+      accuracy = 0;
+      isOnPitch = false;
     });
   }
 
@@ -147,18 +160,26 @@ class _MyAppState extends State<MyApp> {
         ),
         body: Center(
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(height: size.height * 0.3),
-              Text("Note-Octave: $noteOctave", style: TextStyle(fontSize: 20)),
+              //SizedBox(height: size.height * 0.3),
+              Text("Pitch: $noteOctave", style: TextStyle(fontSize: 20)),
               Text("Note: $note", style: TextStyle(fontSize: 18)),
               Text("Octave: $octave", style: TextStyle(fontSize: 18)),
               Text("Frequency: ${frequency.toStringAsFixed(2)} Hz", style: TextStyle(fontSize: 18)),
-              Text("Accuracy: ${accuracy.toStringAsFixed(2)} Hz", style: TextStyle(fontSize: 18)),
+              Text("Accuracy: $accuracy%", style: TextStyle(fontSize: 18)),
               Text("Decibels: ${decibels.toStringAsFixed(2)} dB", style: TextStyle(fontSize: 18)),
-              Text("IsRecording: $isRecording", style: TextStyle(fontSize: 16)),
+              SizedBox(height: size.height * 0.02),
+              Text("Tolerance: ${toleranceCents.toStringAsFixed(2)}", style: TextStyle(fontSize: 18)),
+              Text("Min Precision: ${minPrecision.toStringAsFixed(2)}", style: TextStyle(fontSize: 18)),
               Text("BufferSize: $bufferSize", style: TextStyle(fontSize: 16)),
               Text("SampleRate: $sampleRate", style: TextStyle(fontSize: 16)),
-              SizedBox(height: size.height * 0.1),
+              SizedBox(height: size.height * 0.02),
+              Text("IsRecording: $isRecording", style: TextStyle(fontSize: 16)),
+              //Text("OnPitch", style: TextStyle(fontSize: 16, color: accuracy > minPrecision ? Colors.green : Colors.transparent)),
+              Text("OnPitch Boolean", style: TextStyle(fontSize: 16, color: isOnPitch ? Colors.green : Colors.transparent)),
+              SizedBox(height: size.height * 0.01),
               isRecording ? _stopButton(size) : _startButton(size),
             ],
           ),

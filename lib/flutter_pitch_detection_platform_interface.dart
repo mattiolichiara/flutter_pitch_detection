@@ -30,9 +30,10 @@ class FlutterPitchDetection {
   Future<void> setParameters({
     int? sampleRate,
     int? bufferSize,
-    double? accuracy,
+    double? toleranceCents,
+    double? minPrecision,
   }) async {
-    return _platform.setParameters(sampleRate: sampleRate, bufferSize: bufferSize, accuracy: accuracy);
+    return _platform.setParameters(sampleRate: sampleRate, bufferSize: bufferSize, toleranceCents: toleranceCents, minPrecision: minPrecision);
   }
 
   Future<void> setSampleRate(int sampleRate) async {
@@ -43,20 +44,12 @@ class FlutterPitchDetection {
     return _platform.setBufferSize(bufferSize);
   }
 
-  Future<void> setAccuracy(double accuracy) async {
-    return _platform.setAccuracy(accuracy);
-  }
-
   Future<int> getSampleRate() async {
     return _platform.getSampleRate();
   }
 
   Future<int> getBufferSize() async {
     return _platform.getBufferSize();
-  }
-
-  Future<double> getAccuracy() async {
-    return _platform.getAccuracy();
   }
 
   Future<bool> isRecording() async {
@@ -81,5 +74,29 @@ class FlutterPitchDetection {
 
   Future<double> getDecibels() async {
     return _platform.getDecibels();
+  }
+
+  Future<bool> isOnPitch(double toleranceCents, double minPrecision) async {
+    return _platform.isOnPitch(toleranceCents, minPrecision);
+  }
+
+  Future<int> getAccuracy(double toleranceCents) async {
+    return _platform.getAccuracy(toleranceCents);
+  }
+
+  Future<double> getMinPrecision() async {
+    return _platform.getMinPrecision();
+  }
+
+  Future<void> setMinPrecision(double minPrecision) async {
+    return _platform.setMinPrecision(minPrecision);
+  }
+
+  Future<double> getToleranceCents() async {
+    return _platform.getToleranceCents();
+  }
+
+  Future<void> setToleranceCents(double toleranceCents) async {
+    return _platform.setToleranceCents(toleranceCents);
   }
 }

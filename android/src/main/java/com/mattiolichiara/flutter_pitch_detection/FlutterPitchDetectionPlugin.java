@@ -48,6 +48,10 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
         int sampleRate = call.argument("sampleRate");
         int bufferSize = call.argument("bufferSize");
         int overlap = call.argument("overlap");
+        double toleranceCents = call.argument("toleranceCents") != null ?
+                ((Double) call.argument("toleranceCents")).doubleValue() : 0.5;
+        double minPrecision = call.argument("minPrecision") != null ?
+                ((Double) call.argument("minPrecision")).doubleValue() : 0.8;
 
         if (pitchService != null) {
           pitchService.stopDetection();
@@ -57,6 +61,8 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
                 sampleRate != 0 ? sampleRate : 44100,
                 bufferSize != 0 ? bufferSize : 2048,
                 overlap != 0 ? overlap : 1024,
+                toleranceCents != 0.0f ? toleranceCents : 1.0f,
+                minPrecision != 0.0f ? minPrecision : 0.8,
                 pitchHandler
         );
         pitchService.startDetection();
@@ -67,15 +73,17 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
         try {
           int newSampleRate = call.argument("sampleRate");
           int newBufferSize = call.argument("bufferSize");
-          int newOverlap = call.argument("overlap");
-          double newAccuracy = call.argument("accuracy") != null ?
-                  ((Double) call.argument("accuracy")).floatValue() : 0.8f;
+          double newToleranceCents = call.argument("toleranceCents") != null ?
+                  ((Double) call.argument("toleranceCents")).doubleValue() : 0.5;
+          double newMinPrecision = call.argument("minPrecision") != null ?
+                  ((Double) call.argument("minPrecision")).doubleValue() : 0.8;
 
           if (pitchService != null) {
             pitchService.setParameters(
                     newSampleRate != 0 ? newSampleRate : 44100,
                     newBufferSize != 0 ? newBufferSize : 1024,
-                    newAccuracy
+                    newToleranceCents != 0.0f ? newToleranceCents : 1.0f,
+                    newMinPrecision != 0.0f ? newMinPrecision : 0.8
             );
             result.success(null);
           } else {
@@ -111,20 +119,6 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
           }
         } catch(Exception e) {
           result.error("INVALID_BUFFER_SIZE", "Failed to set buffer size: " + e.getMessage(), null);
-        }
-        break;
-
-      case "setAccuracy":
-        try {
-          double newAccuracy = call.argument("accuracy");
-          if (pitchService != null) {
-            pitchService.setAccuracy(
-                    newAccuracy != 0.0f ? newAccuracy : 1.0f
-            );
-            result.success(null);
-          }
-        } catch(Exception e) {
-          result.error("INVALID_ACCURACY", "Failed to set accuracy: " + e.getMessage(), null);
         }
         break;
 
@@ -172,19 +166,6 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
           }
         } catch (Exception e) {
           result.error("GET_BUFFER_SIZE_FAILED", "Failed to get buffer size: " + e.getMessage(), null);
-        }
-        break;
-
-      case "getAccuracy":
-        try {
-          if (pitchService != null) {
-            double accuracy = pitchService.getAccuracy();
-            result.success(accuracy);
-          } else {
-            result.error("SERVICE_NOT_RUNNING", "Pitch detection service not running", null);
-          }
-        } catch (Exception e) {
-          result.error("GET_ACCURACY_FAILED", "Failed to get accuracy: " + e.getMessage(), null);
         }
         break;
 
@@ -252,6 +233,93 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
           result.error("GET_DECIBELS_FAILED", "Failed to get decibels: " + e.getMessage(), null);
         }
         break;
+      case "setToleranceCents":
+        try {
+          double newToleranceCents = call.argument("toleranceCents");
+          if (pitchService != null) {
+            pitchService.setToleranceCents(
+                    newToleranceCents != 0.0 ? newToleranceCents : 1.0
+            );
+            result.success(null);
+          } else {
+            result.error("SERVICE_NOT_RUNNING", "Pitch detection service not running", null);
+          }
+        } catch (Exception e) {
+          result.error("SET_TOLERANCE_FAILED", "Failed to set tolerance: " + e.getMessage(), null);
+        }
+        break;
+
+      case "getToleranceCents":
+        try {
+          if (pitchService != null) {
+            result.success(pitchService.getToleranceCents());
+          } else {
+            result.error("SERVICE_NOT_RUNNING", "Service not running", null);
+          }
+        } catch (Exception e) {
+          result.error("GET_TOLERANCE_FAILED", "Failed to get tolerance: " + e.getMessage(), null);
+        }
+        break;
+
+      case "setMinPrecision":
+        try {
+          double newMinPrecision = call.argument("minPrecision");
+          if (pitchService != null) {
+            pitchService.setMinPrecision(
+                    newMinPrecision != 0.0 ? newMinPrecision : 0.8
+            );
+            result.success(null);
+          } else {
+            result.error("SERVICE_NOT_RUNNING", "Service not running", null);
+          }
+        } catch (Exception e) {
+          result.error("SET_PRECISION_FAILED", "Failed to set precision: " + e.getMessage(), null);
+        }
+        break;
+
+      case "getMinPrecision":
+        try {
+          if (pitchService != null) {
+            result.success(pitchService.getMinPrecision());
+          } else {
+            result.error("SERVICE_NOT_RUNNING", "Service not running", null);
+          }
+        } catch (Exception e) {
+          result.error("GET_PRECISION_FAILED", "Failed to get precision: " + e.getMessage(), null);
+        }
+        break;
+
+      case "isOnPitch":
+        try {
+          if (pitchService != null) {
+            double tolerance = call.argument("toleranceCents");
+            double precision = call.argument("minPrecision");
+              result.success(pitchService.isOnPitch(tolerance, precision));
+          } else {
+            result.error("SERVICE_NOT_RUNNING", "Service not running", null);
+          }
+        } catch (Exception e) {
+          result.error("PITCH_CHECK_FAILED", "Failed to check pitch: " + e.getMessage(), null);
+        }
+        break;
+
+      case "getAccuracy":
+        try {
+          if (pitchService != null) {
+            Double tolerance = call.argument("toleranceCents");
+            if (tolerance == null) {
+              result.error("MISSING_PARAMETER", "toleranceCents parameter is required", null);
+            } else {
+              int accuracy = pitchService.getAccuracy(tolerance);
+              result.success(accuracy);
+            }
+          } else {
+            result.error("SERVICE_NOT_RUNNING", "Pitch detection service not running", null);
+          }
+        } catch (Exception e) {
+          result.error("ACCURACY_CHECK_FAILED", "Failed to check accuracy: " + e.getMessage(), null);
+        }
+        break;
 
       default:
         result.notImplemented();
@@ -290,7 +358,7 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
     }
 
     if (pitchService == null) {
-      pitchService = new PitchDetectionService(44100, 2048, 1024, pitchHandler);
+      pitchService = new PitchDetectionService(44100, 2048, 1024, 0.5, 0.8, pitchHandler);
       pitchService.startDetection();
     }
   }

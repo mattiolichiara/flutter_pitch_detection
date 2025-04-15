@@ -11,7 +11,7 @@ class MockFlutterPitchDetectionPlatform with MockPlatformInterfaceMixin implemen
   final StreamController<Map<String, dynamic>> _controller = StreamController.broadcast();
   int _sampleRate = 44100;
   int _bufferSize = 8192;
-  double _accuracy = 0.8;
+  double _toleranceCents = 0.8;
   bool _isRunning = false;
 
   // @override
@@ -21,8 +21,8 @@ class MockFlutterPitchDetectionPlatform with MockPlatformInterfaceMixin implemen
   Stream<Map<String, dynamic>> get onPitchDetected => _controller.stream;
 
   @override
-  Future<void> setAccuracy(double accuracy) async {
-    _accuracy = accuracy;
+  Future<void> setToleranceCents(double toleranceCents) async {
+    _toleranceCents = toleranceCents;
   }
 
   @override
@@ -35,25 +35,7 @@ class MockFlutterPitchDetectionPlatform with MockPlatformInterfaceMixin implemen
     _sampleRate = sampleRate;
   }
 
-  @override
-  Future<void> startDetection({int sampleRate = 44100, int bufferSize = 8192, int overlap = 0}) async {
-    _isRunning = true;
-    _sampleRate = sampleRate;
-    _bufferSize = bufferSize;
 
-    Timer.periodic(Duration(milliseconds: 100), (timer) {
-      if (!_isRunning) {
-        timer.cancel();
-        return;
-      }
-      _controller.add({
-        'pitch': 440.0,
-        'frequency': 440.0,
-        'probability': _accuracy,
-        'isPitched': true
-      });
-    });
-  }
 
   @override
   Future<void> stopDetection() async {
@@ -61,10 +43,10 @@ class MockFlutterPitchDetectionPlatform with MockPlatformInterfaceMixin implemen
   }
 
   @override
-  Future<void> setParameters({int? sampleRate, int? bufferSize, double? accuracy}) async {
+  Future<void> setParameters({int? sampleRate, int? bufferSize, double? toleranceCents}) async {
     if (sampleRate != null) _sampleRate = sampleRate;
     if (bufferSize != null) _bufferSize = bufferSize;
-    if (accuracy != null) _accuracy = accuracy;
+    if (toleranceCents != null) _toleranceCents = toleranceCents;
   }
 
   void simulatePitch(double pitch, double probability) {
@@ -77,8 +59,8 @@ class MockFlutterPitchDetectionPlatform with MockPlatformInterfaceMixin implemen
   }
 
   @override
-  Future<double> getAccuracy() async {
-    return _accuracy;
+  Future<double> getToleranceCents() async {
+    return _toleranceCents;
   }
 
   @override
@@ -129,6 +111,18 @@ class MockFlutterPitchDetectionPlatform with MockPlatformInterfaceMixin implemen
   @override
   Future<double> getDecibels() {
     // TODO: implement getDecibels
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<double> isOnPitch(double targetFrequency, double toleranceCents) {
+    // TODO: implement isOnPitch
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> startDetection({int? sampleRate, int? bufferSize, int? overlap}) {
+    // TODO: implement startDetection
     throw UnimplementedError();
   }
 }

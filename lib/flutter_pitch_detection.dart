@@ -64,12 +64,14 @@ abstract class FlutterPitchDetectionPlatform extends PlatformInterface {
   Future<void> setParameters({
     int? sampleRate,
     int? bufferSize,
-    double? accuracy,
+    double? toleranceCents,
+    double? minPrecision,
   }) async {
     await FlutterPitchDetectionPlatform.instance.setParameters(
       sampleRate: sampleRate,
       bufferSize: bufferSize,
-      accuracy: accuracy,
+      toleranceCents: toleranceCents,
+      minPrecision: minPrecision,
     );
   }
 
@@ -81,20 +83,12 @@ abstract class FlutterPitchDetectionPlatform extends PlatformInterface {
     await FlutterPitchDetectionPlatform.instance.setBufferSize(bufferSize);
   }
 
-  Future<void> setAccuracy(double accuracy) async {
-    await FlutterPitchDetectionPlatform.instance.setAccuracy(accuracy);
-  }
-
   Future<int> getSampleRate() async {
     return await FlutterPitchDetectionPlatform.instance.getSampleRate();
   }
 
   Future<int> getBufferSize() async {
     return await FlutterPitchDetectionPlatform.instance.getBufferSize();
-  }
-
-  Future<double> getAccuracy() async {
-    return await FlutterPitchDetectionPlatform.instance.getAccuracy();
   }
 
   Future<bool> isRecording() async {
@@ -119,5 +113,29 @@ abstract class FlutterPitchDetectionPlatform extends PlatformInterface {
 
   Future<double> getDecibels() async {
     return await FlutterPitchDetectionPlatform.instance.getDecibels();
+  }
+
+  Future<bool> isOnPitch(double toleranceCents, double minPrecision) async {
+    return FlutterPitchDetectionPlatform.instance.isOnPitch(toleranceCents, minPrecision);
+  }
+
+  Future<int> getAccuracy(double toleranceCents) async {
+    return FlutterPitchDetectionPlatform.instance.getAccuracy(toleranceCents);
+  }
+
+  Future<double> getMinPrecision() async {
+    return FlutterPitchDetectionPlatform.instance.getMinPrecision();
+  }
+
+  Future<void> setMinPrecision(double minPrecision) async {
+    return FlutterPitchDetectionPlatform.instance.setMinPrecision(minPrecision);
+  }
+
+  Future<double> getToleranceCents() async {
+    return FlutterPitchDetectionPlatform.instance.getToleranceCents();
+  }
+
+  Future<void> setToleranceCents(double toleranceCents) async {
+    return FlutterPitchDetectionPlatform.instance.setToleranceCents(toleranceCents);
   }
 }
