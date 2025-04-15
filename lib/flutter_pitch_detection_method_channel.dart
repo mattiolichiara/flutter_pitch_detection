@@ -172,4 +172,13 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
       throw Exception("Error Retrieving Note-Octave Full Value: ${e.message}");
     }
   }
+
+  @override
+  Future<double> getDecibels() async {
+    try {
+      return await _methodChannel.invokeMethod('getDecibels');
+    } on PlatformException catch(e) {
+      throw Exception("Error Retrieving Decibels Value: ${e.message}");
+    }
+  }
 }

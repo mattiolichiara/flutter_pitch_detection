@@ -240,6 +240,19 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
         }
         break;
 
+      case "getDecibels":
+        try {
+          if (pitchService != null) {
+            double decibels = pitchService.getDecibels();
+            result.success(decibels);
+          } else {
+            result.error("SERVICE_NOT_RUNNING", "Pitch detection service not running", null);
+          }
+        } catch (Exception e) {
+          result.error("GET_DECIBELS_FAILED", "Failed to get decibels: " + e.getMessage(), null);
+        }
+        break;
+
       default:
         result.notImplemented();
     }
@@ -248,6 +261,10 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
   private final PitchDetectionHandler pitchHandler = (pitchResult, audioEvent) -> {
     float pitch = pitchResult.getPitch();
     if (pitch <= 0) return;
+
+    float[] buffer = audioEvent.getFloatBuffer();
+    double rms = pitchService.calculateLoudnessInDbSPL(buffer);
+    double db = 20 * Math.log10(rms / 0.00002);
 
     new Handler(Looper.getMainLooper()).post(() -> {
       synchronized (sinkLock) {
@@ -258,6 +275,7 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
           data.put("note", pitchService.midiToNoteName(midi));
           data.put("octave", pitchService.midiToOctave(midi));
           data.put("midi", midi);
+          data.put("decibels", db);
 
           eventSink.success(data);
         }

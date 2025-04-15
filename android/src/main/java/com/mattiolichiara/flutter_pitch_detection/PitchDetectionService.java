@@ -14,6 +14,7 @@ public class PitchDetectionService {
     private boolean isRecording = false;
     private double currentFrequency = -1f;
     private int currentMidiNote = -1;
+    private double decibels = 0;
 
 
 
@@ -42,6 +43,26 @@ public class PitchDetectionService {
 
     protected int midiToOctave(int midi) {
         return (midi / 12) - 1;
+    }
+
+    protected double calculateLoudnessInDbSPL(float[] audioBuffer) {
+        if (audioBuffer == null || audioBuffer.length == 0) {
+            return 0.0;
+        }
+
+        final double referencePressure = 20e-6;
+        final double epsilon = 1e-12;
+
+        double sum = 0.0;
+        for (float sample : audioBuffer) {
+            sum += sample * sample;
+        }
+        double rms = Math.sqrt(sum / audioBuffer.length);
+
+        double ratio = rms / referencePressure;
+        double dbSPL = 20 * Math.log10(Math.max(ratio, epsilon));
+
+        return Math.max(0, Math.min(dbSPL, 140));
     }
 
     public double getFrequency() {
@@ -93,6 +114,10 @@ public class PitchDetectionService {
 
     public double getAccuracy() {
         return accuracy;
+    }
+
+    public double getDecibels() {
+        return decibels;
     }
 
     public synchronized void startDetection() {

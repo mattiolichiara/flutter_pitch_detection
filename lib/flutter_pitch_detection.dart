@@ -116,4 +116,8 @@ abstract class FlutterPitchDetectionPlatform extends PlatformInterface {
   Future<String> printNoteOctave() async {
     return await FlutterPitchDetectionPlatform.instance.printNoteOctave();
   }
+
+  Future<double> getDecibels() async {
+    return await FlutterPitchDetectionPlatform.instance.getDecibels();
+  }
 }

@@ -78,4 +78,8 @@ class FlutterPitchDetection {
   Future<String> printNoteOctave() async {
     return _platform.printNoteOctave();
   }
+
+  Future<double> getDecibels() async {
+    return _platform.getDecibels();
+  }
 }

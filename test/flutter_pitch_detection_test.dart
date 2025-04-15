@@ -125,6 +125,12 @@ class MockFlutterPitchDetectionPlatform with MockPlatformInterfaceMixin implemen
     // TODO: implement requestMicrophonePermission
     throw UnimplementedError();
   }
+
+  @override
+  Future<double> getDecibels() {
+    // TODO: implement getDecibels
+    throw UnimplementedError();
+  }
 }
 
 void main() {

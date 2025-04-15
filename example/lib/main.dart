@@ -12,6 +12,7 @@ void main() {
 //TODO get decibels
 //TODO return pitch accuracy
 //TODO add isOnPitch
+//TODO fix permission issues
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -31,6 +32,7 @@ class _MyAppState extends State<MyApp> {
   int bufferSize = 0;
   int sampleRate = 0;
   bool isRecording = false;
+  double decibels = 0;
 
   @override
   void initState() {
@@ -60,6 +62,7 @@ class _MyAppState extends State<MyApp> {
       final newNoteOctave = await _flutterPitchDetectionPlugin.printNoteOctave();
       final newOctave = await _flutterPitchDetectionPlugin.getOctave();
       final newAccuracy = await _flutterPitchDetectionPlugin.getAccuracy();
+      final newDecibels = await _flutterPitchDetectionPlugin.getDecibels();
       final newBufferSize = await _flutterPitchDetectionPlugin.getBufferSize();
       final newSampleRate = await _flutterPitchDetectionPlugin.getSampleRate();
       final newIsRecording = await _flutterPitchDetectionPlugin.isRecording();
@@ -73,6 +76,7 @@ class _MyAppState extends State<MyApp> {
         bufferSize = newBufferSize;
         sampleRate = newSampleRate;
         isRecording = newIsRecording;
+        decibels = newDecibels;
       });
     });
   }
@@ -150,6 +154,7 @@ class _MyAppState extends State<MyApp> {
               Text("Octave: $octave", style: TextStyle(fontSize: 18)),
               Text("Frequency: ${frequency.toStringAsFixed(2)} Hz", style: TextStyle(fontSize: 18)),
               Text("Accuracy: ${accuracy.toStringAsFixed(2)} Hz", style: TextStyle(fontSize: 18)),
+              Text("Decibels: ${decibels.toStringAsFixed(2)} dB", style: TextStyle(fontSize: 18)),
               Text("IsRecording: $isRecording", style: TextStyle(fontSize: 16)),
               Text("BufferSize: $bufferSize", style: TextStyle(fontSize: 16)),
               Text("SampleRate: $sampleRate", style: TextStyle(fontSize: 16)),
