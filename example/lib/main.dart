@@ -178,7 +178,7 @@ class _MyAppState extends State<MyApp> {
               SizedBox(height: size.height * 0.02),
               Text("IsRecording: $isRecording", style: TextStyle(fontSize: 16)),
               //Text("OnPitch", style: TextStyle(fontSize: 16, color: accuracy > minPrecision ? Colors.green : Colors.transparent)),
-              Text("OnPitch Boolean", style: TextStyle(fontSize: 16, color: isOnPitch ? Colors.green : Colors.transparent)),
+              Text("OnPitch", style: TextStyle(fontSize: 20, color: isOnPitch ? Colors.green : Colors.transparent)),
               SizedBox(height: size.height * 0.01),
               isRecording ? _stopButton(size) : _startButton(size),
             ],

@@ -331,8 +331,7 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
     if (pitch <= 0) return;
 
     float[] buffer = audioEvent.getFloatBuffer();
-    double rms = pitchService.calculateLoudnessInDbSPL(buffer);
-    double db = 20 * Math.log10(rms / 0.00002);
+    double db = pitchService.calculateLoudnessInDbSPL(buffer);
 
     new Handler(Looper.getMainLooper()).post(() -> {
       synchronized (sinkLock) {

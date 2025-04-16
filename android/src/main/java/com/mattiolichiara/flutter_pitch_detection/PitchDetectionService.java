@@ -104,6 +104,17 @@ public class PitchDetectionService {
         return Math.max(0, Math.min(dbSPL, 140));
     }
 
+    protected double calculateLoudnessInDbFS(float[] audioBuffer) {
+        if (audioBuffer == null || audioBuffer.length == 0) return 0.0;
+
+        double peak = 0.0;
+        for (float sample : audioBuffer) {
+            peak = Math.max(peak, Math.abs(sample));
+        }
+        double dbFS = 20 * Math.log10(Math.max(peak, 1e-12));
+        return Math.max(-120, dbFS);
+    }
+
     public double getFrequency() {
         return currentFrequency;
     }
@@ -196,7 +207,7 @@ public class PitchDetectionService {
                             synchronized (this) {
                                 currentFrequency = pitch;
                                 currentMidiNote = frequencyToMidi(pitch);
-                                lastPitchProbability = probability; // Store for later use
+                                lastPitchProbability = probability;
                             }
                         } else {
                             synchronized (this) {
