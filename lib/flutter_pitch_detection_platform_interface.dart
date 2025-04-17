@@ -72,10 +72,6 @@ class FlutterPitchDetection {
     return _platform.printNoteOctave();
   }
 
-  Future<double> getDecibels() async {
-    return _platform.getDecibels();
-  }
-
   Future<bool> isOnPitch(double toleranceCents, double minPrecision) async {
     return _platform.isOnPitch(toleranceCents, minPrecision);
   }
@@ -98,5 +94,13 @@ class FlutterPitchDetection {
 
   Future<void> setToleranceCents(double toleranceCents) async {
     return _platform.setToleranceCents(toleranceCents);
+  }
+
+  Future<double> getVolume() async {
+    return _platform.getVolume();
+  }
+
+  Future<double> getVolumeFromDbFS() async {
+    return _platform.getVolumeFromDbFS();
   }
 }

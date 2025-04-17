@@ -156,15 +156,6 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
   }
 
   @override
-  Future<double> getDecibels() async {
-    try {
-      return await _methodChannel.invokeMethod('getDecibels');
-    } on PlatformException catch(e) {
-      throw Exception("Error Retrieving Decibels Value: ${e.message}");
-    }
-  }
-
-  @override
   Future<bool> isOnPitch(double toleranceCents, double minPrecision) async {
     try {
       return await _methodChannel.invokeMethod('isOnPitch', {'toleranceCents': toleranceCents, 'minPrecision': minPrecision},);
@@ -222,6 +213,24 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
       });
     } on PlatformException catch (e) {
       throw Exception('Failed to set toleranceCents: ${e.message}');
+    }
+  }
+
+  @override
+  Future<double> getVolume() async {
+    try {
+      return await _methodChannel.invokeMethod('getVolume');
+    } on PlatformException catch(e) {
+      throw Exception("Volume Read Error: ${e.message}");
+    }
+  }
+
+  @override
+  Future<double> getVolumeFromDbFS() async {
+    try {
+      return await _methodChannel.invokeMethod('getVolumeFromDbFS');
+    } on PlatformException catch(e) {
+      throw Exception("Volume from DbFS Read Error: ${e.message}");
     }
   }
 }

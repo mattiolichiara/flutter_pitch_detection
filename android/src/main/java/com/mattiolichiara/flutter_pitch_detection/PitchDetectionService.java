@@ -3,6 +3,8 @@ import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.io.android.AudioDispatcherFactory;
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchProcessor;
+import be.tarsos.dsp.AudioProcessor;
+import be.tarsos.dsp.AudioEvent;
 
 public class PitchDetectionService {
     private AudioDispatcher dispatcher;
@@ -14,9 +16,10 @@ public class PitchDetectionService {
     private boolean isRecording = false;
     private double currentFrequency = -1f;
     private int currentMidiNote = -1;
-    private double decibels = 0;
     private double minPrecision = 0.85;
     private double lastPitchProbability = 0.0;
+    private double volume = 0;
+    private double volumeFromDbFS = 0;
 
 //    public String getPlatformVersion() {
 //        return "Android " + android.os.Build.VERSION.RELEASE;
@@ -31,6 +34,35 @@ public class PitchDetectionService {
         this.minPrecision = minPrecision;
         this.lastPitchProbability = 0.0;
         this.pitchHandler = pitchHandler;
+    }
+
+    //RMS
+    protected double calculateNormalizedVolume(float[] audioBuffer) {
+        double sum = 0.0;
+        for (float sample : audioBuffer) {
+            sum += sample * sample;
+        }
+
+        double rms = Math.sqrt(sum / audioBuffer.length);
+        double dbFS = 20 * Math.log10(Math.max(rms, 1e-12));
+        return Math.max(0, Math.min(100, (120 + dbFS) * (100.0 / 120.0)));
+    }
+
+    protected double calculateNormalizedVolumeFromDbFS(float[] audioBuffer) {
+        double dbFS = calculateLoudnessInDbFS(audioBuffer);
+        return Math.max(0, Math.min(100, (120 + dbFS) * (100.0 / 120.0)));
+    }
+
+    //peak
+    protected double calculateLoudnessInDbFS(float[] audioBuffer) {
+        if (audioBuffer == null || audioBuffer.length == 0) return 0.0;
+
+        double peak = 0.0;
+        for (float sample : audioBuffer) {
+            peak = Math.max(peak, Math.abs(sample));
+        }
+        double dbFS = 20 * Math.log10(Math.max(peak, 1e-12));
+        return Math.max(-120, dbFS);
     }
 
     public int getAccuracy(double toleranceCents) {
@@ -82,37 +114,6 @@ public class PitchDetectionService {
 
     protected int midiToOctave(int midi) {
         return (midi / 12) - 1;
-    }
-
-    protected double calculateLoudnessInDbSPL(float[] audioBuffer) {
-        if (audioBuffer == null || audioBuffer.length == 0) {
-            return 0.0;
-        }
-
-        final double referencePressure = 20e-6;
-        final double epsilon = 1e-12;
-
-        double sum = 0.0;
-        for (float sample : audioBuffer) {
-            sum += sample * sample;
-        }
-        double rms = Math.sqrt(sum / audioBuffer.length);
-
-        double ratio = rms / referencePressure;
-        double dbSPL = 20 * Math.log10(Math.max(ratio, epsilon));
-
-        return Math.max(0, Math.min(dbSPL, 140));
-    }
-
-    protected double calculateLoudnessInDbFS(float[] audioBuffer) {
-        if (audioBuffer == null || audioBuffer.length == 0) return 0.0;
-
-        double peak = 0.0;
-        for (float sample : audioBuffer) {
-            peak = Math.max(peak, Math.abs(sample));
-        }
-        double dbFS = 20 * Math.log10(Math.max(peak, 1e-12));
-        return Math.max(-120, dbFS);
     }
 
     public double getFrequency() {
@@ -179,8 +180,12 @@ public class PitchDetectionService {
         return minPrecision;
     }
 
-    public double getDecibels() {
-        return decibels;
+    public double getVolume() {
+        return volume;
+    }
+
+    public double getVolumeFromDbFS() {
+        return volumeFromDbFS;
     }
 
     public synchronized void startDetection() {
@@ -194,6 +199,23 @@ public class PitchDetectionService {
                     bufferSize,
                     overlap
             );
+
+            dispatcher.addAudioProcessor(new AudioProcessor() {
+                @Override
+                public boolean process(AudioEvent audioEvent) {
+                    float[] audioBuffer = audioEvent.getFloatBuffer();
+                    synchronized (PitchDetectionService.this) {
+                        volume = calculateNormalizedVolume(audioBuffer);
+                        volumeFromDbFS = calculateNormalizedVolumeFromDbFS(audioBuffer);
+                    }
+                    return true;
+                }
+
+                @Override
+                public void processingFinished() {
+                    // No special cleanup needed
+                }
+            });
 
             dispatcher.addAudioProcessor(new PitchProcessor(
                     PitchProcessor.PitchEstimationAlgorithm.FFT_YIN,

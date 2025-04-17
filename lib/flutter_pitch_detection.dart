@@ -21,19 +21,16 @@ abstract class FlutterPitchDetectionPlatform extends PlatformInterface {
   Future<bool> requestMicrophonePermission() async {
     var status = await Permission.microphone.status;
 
-    if (status.isGranted) {
-      return true;
-    } else if (status.isDenied || status.isRestricted || status.isLimited) {
-      final result = await Permission.microphone.request();
-      return result.isGranted;
-    }
+    if (status.isGranted) return true;
 
-    if (status.isPermanentlyDenied) {
+    final result = await Permission.microphone.request();
+
+    if (result.isPermanentlyDenied) {
       await openAppSettings();
       return false;
     }
 
-    return false;
+    return result.isGranted;
   }
 
   Future<void> startDetection({
@@ -45,6 +42,8 @@ abstract class FlutterPitchDetectionPlatform extends PlatformInterface {
     if (!hasPermission) {
       throw Exception('Microphone permission not granted');
     }
+
+    await Future.delayed(const Duration(milliseconds: 1000));
 
     await _instance.startDetection(
       sampleRate: sampleRate,
@@ -111,10 +110,6 @@ abstract class FlutterPitchDetectionPlatform extends PlatformInterface {
     return await FlutterPitchDetectionPlatform.instance.printNoteOctave();
   }
 
-  Future<double> getDecibels() async {
-    return await FlutterPitchDetectionPlatform.instance.getDecibels();
-  }
-
   Future<bool> isOnPitch(double toleranceCents, double minPrecision) async {
     return FlutterPitchDetectionPlatform.instance.isOnPitch(toleranceCents, minPrecision);
   }
@@ -137,5 +132,13 @@ abstract class FlutterPitchDetectionPlatform extends PlatformInterface {
 
   Future<void> setToleranceCents(double toleranceCents) async {
     return FlutterPitchDetectionPlatform.instance.setToleranceCents(toleranceCents);
+  }
+
+  Future<double> getVolume() async {
+    return FlutterPitchDetectionPlatform.instance.getVolume();
+  }
+
+  Future<double> getVolumeFromDbFS() async {
+    return FlutterPitchDetectionPlatform.instance.getVolumeFromDbFS();
   }
 }

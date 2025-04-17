@@ -109,20 +109,32 @@ class MockFlutterPitchDetectionPlatform with MockPlatformInterfaceMixin implemen
   }
 
   @override
-  Future<double> getDecibels() {
-    // TODO: implement getDecibels
+  Future<void> startDetection({int? sampleRate, int? bufferSize, int? overlap}) {
+    // TODO: implement startDetection
     throw UnimplementedError();
   }
 
   @override
-  Future<double> isOnPitch(double targetFrequency, double toleranceCents) {
+  Future<int> getAccuracy(double toleranceCents) {
+    // TODO: implement getAccuracy
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<double> getMinPrecision() {
+    // TODO: implement getMinPrecision
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> isOnPitch(double toleranceCents, double minPrecision) {
     // TODO: implement isOnPitch
     throw UnimplementedError();
   }
 
   @override
-  Future<void> startDetection({int? sampleRate, int? bufferSize, int? overlap}) {
-    // TODO: implement startDetection
+  Future<void> setMinPrecision(double minPrecision) {
+    // TODO: implement setMinPrecision
     throw UnimplementedError();
   }
 }

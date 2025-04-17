@@ -11,7 +11,7 @@ void main() {
   runApp(const MyApp());
 }
 
-//TODO get decibels
+//TODO get volume from 0 to 100
 //TODO return pitch accuracy
 //TODO add isOnPitch
 //TODO fix permission issues
@@ -34,10 +34,11 @@ class _MyAppState extends State<MyApp> {
   int bufferSize = 0;
   int sampleRate = 0;
   bool isRecording = false;
-  double decibels = 0;
   bool isOnPitch = false;
   int accuracy = 0;
   double minPrecision = 0;
+  double volume = 0;
+  double volumeFromDbFS = 0;
 
   @override
   void initState() {
@@ -67,13 +68,14 @@ class _MyAppState extends State<MyApp> {
       final newNoteOctave = await _flutterPitchDetectionPlugin.printNoteOctave();
       final newOctave = await _flutterPitchDetectionPlugin.getOctave();
       final newToleranceCents = await _flutterPitchDetectionPlugin.getToleranceCents();
-      final newDecibels = await _flutterPitchDetectionPlugin.getDecibels();
       final newBufferSize = await _flutterPitchDetectionPlugin.getBufferSize();
       final newSampleRate = await _flutterPitchDetectionPlugin.getSampleRate();
       final newIsRecording = await _flutterPitchDetectionPlugin.isRecording();
       final newMinPrecision = await _flutterPitchDetectionPlugin.getMinPrecision();
       final newAccuracy = await _flutterPitchDetectionPlugin.getAccuracy(toleranceCents);
       final newIsOnPitch = await _flutterPitchDetectionPlugin.isOnPitch(toleranceCents, minPrecision);
+      final newVolume = await _flutterPitchDetectionPlugin.getVolume();
+      final newVolumeFromDbSF = await _flutterPitchDetectionPlugin.getVolumeFromDbFS();
 
       setState(() {
         note = newNote;
@@ -84,10 +86,11 @@ class _MyAppState extends State<MyApp> {
         bufferSize = newBufferSize;
         sampleRate = newSampleRate;
         isRecording = newIsRecording;
-        decibels = newDecibels;
         accuracy = newAccuracy;
         minPrecision = newMinPrecision;
         isOnPitch = newIsOnPitch;
+        volume = newVolume;
+        volumeFromDbFS = newVolumeFromDbSF;
       });
     });
   }
@@ -118,6 +121,8 @@ class _MyAppState extends State<MyApp> {
       isRecording = false;
       accuracy = 0;
       isOnPitch = false;
+      double volume = 0;
+      double volumeFromDbFS = 0;
     });
   }
 
@@ -169,7 +174,8 @@ class _MyAppState extends State<MyApp> {
               Text("Octave: $octave", style: TextStyle(fontSize: 18)),
               Text("Frequency: ${frequency.toStringAsFixed(2)} Hz", style: TextStyle(fontSize: 18)),
               Text("Accuracy: $accuracy%", style: TextStyle(fontSize: 18)),
-              Text("Decibels: ${decibels.toStringAsFixed(2)} dB", style: TextStyle(fontSize: 18)),
+              Text("Volume: ${volume.toStringAsFixed(2)}", style: TextStyle(fontSize: 18)),
+              Text("Volume from DbSF: ${volumeFromDbFS.toStringAsFixed(2)}", style: TextStyle(fontSize: 18)),
               SizedBox(height: size.height * 0.02),
               Text("Tolerance: ${toleranceCents.toStringAsFixed(2)}", style: TextStyle(fontSize: 18)),
               Text("Min Precision: ${minPrecision.toStringAsFixed(2)}", style: TextStyle(fontSize: 18)),
