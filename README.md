@@ -9,11 +9,11 @@ A Flutter plugin for real-time audio pitch detection using TarsosDSP on Android.
 - Volume measurement (normalized and dBFS)
 - Pitch accuracy and probability
 - Configurable parameters (sample rate, buffer size, etc.)
-
+<br>
 <img src="https://github.com/user-attachments/assets/7f230f00-615b-4e19-a508-b39851eed765" width="200">
 <img src="https://github.com/user-attachments/assets/a7d3b6db-f199-4525-a2b4-ebc96d9e9b6d" width="200">
 <img src="https://github.com/user-attachments/assets/9f5323d8-435a-41e6-a3d8-646882832a10" width="200">
-<img src="https://github.com/user-attachments/assets/d711b1a2-4546-41ab-9588-e7bdaf6419d0" width="200"><br>
+<img src="https://github.com/user-attachments/assets/d711b1a2-4546-41ab-9588-e7bdaf6419d0" width="200"><br><br>
 
 ## Installation
 
