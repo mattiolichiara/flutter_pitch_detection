@@ -1,3 +1,5 @@
-## 0.0.1
+## 1.0.0
 
-* TODO: Describe initial release.
+- Initial release of Flutter Pitch Detection Plugin
+- Features: Real-time pitch, note, and volume detection
+- Android-only support
