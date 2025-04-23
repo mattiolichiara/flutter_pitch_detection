@@ -11,11 +11,6 @@ void main() {
   runApp(const MyApp());
 }
 
-//TODO get volume from 0 to 100
-//TODO return pitch accuracy
-//TODO add isOnPitch
-//TODO fix permission issues
-
 //TODO send audio stream to user
 
 class MyApp extends StatefulWidget {
