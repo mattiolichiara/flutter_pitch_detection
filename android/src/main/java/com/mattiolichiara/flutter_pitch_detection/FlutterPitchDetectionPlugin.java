@@ -13,6 +13,7 @@ import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import com.mattiolichiara.flutter_pitch_detection.*;
 import android.os.Handler;
 import android.os.Looper;
+import io.flutter.plugin.common.PluginRegistry;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +29,7 @@ import androidx.core.content.ContextCompat;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 
-public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler, ActivityAware {
+public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler, ActivityAware, PluginRegistry.RequestPermissionsResultListener {
   private static final String CHANNEL = "pitch_detection/methods";
   private static final String EVENT_CHANNEL = "pitch_detection/events";
 
@@ -41,11 +42,13 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
   private Context context;
   private int sampleRate;
   private int bufferSize;
-
+  private MethodChannel.Result pendingResult;
+  private MethodCall pendingCall;
 
   @Override
   public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
     this.activity = binding.getActivity();
+    binding.addRequestPermissionsResultListener(this);
   }
 
   @Override
@@ -64,6 +67,25 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
   }
 
   @Override
+  public boolean onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    if (requestCode == 1001) {
+      if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (pendingCall != null && pendingResult != null) {
+          startPitchDetection(pendingCall, pendingResult);
+        }
+      } else {
+        if (pendingResult != null) {
+          pendingResult.error("PERMISSION_DENIED", "Microphone permission not granted", null);
+        }
+      }
+      pendingCall = null;
+      pendingResult = null;
+      return true;
+    }
+    return false;
+  }
+
+  @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
     context = binding.getApplicationContext();
     methodChannel = new MethodChannel(binding.getBinaryMessenger(), CHANNEL);
@@ -71,6 +93,31 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
 
     eventChannel = new EventChannel(binding.getBinaryMessenger(), EVENT_CHANNEL);
     eventChannel.setStreamHandler(this);
+  }
+
+  private void startPitchDetection(MethodCall call, Result result) {
+    int sampleRate = call.argument("sampleRate");
+    int bufferSize = call.argument("bufferSize");
+    int overlap = call.argument("overlap");
+    double toleranceCents = call.argument("toleranceCents") != null ?
+            ((Double) call.argument("toleranceCents")).doubleValue() : 0.5;
+    double minPrecision = call.argument("minPrecision") != null ?
+            ((Double) call.argument("minPrecision")).doubleValue() : 0.8;
+
+    if (pitchService != null) {
+      pitchService.stopDetection();
+    }
+
+    pitchService = new PitchDetectionService(
+            sampleRate != 0 ? sampleRate : 44100,
+            bufferSize != 0 ? bufferSize : 2048,
+            overlap != 0 ? overlap : 1024,
+            toleranceCents != 0.0f ? toleranceCents : 1.0f,
+            minPrecision != 0.0f ? minPrecision : 0.8,
+            pitchHandler
+    );
+    pitchService.startDetection();
+    result.success(null);
   }
 
   @Override
@@ -83,37 +130,12 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
 
       case "startDetection":
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+          pendingCall = call;
+          pendingResult = result;
           ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.RECORD_AUDIO}, 1001);
-        }
-
-        if(ContextCompat.checkSelfPermission(activity, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-          result.error("PERMISSION_DENIED", "Microphone permission not granted", null);
-          return;
         } else {
-           int sampleRate = call.argument("sampleRate");
-           int bufferSize = call.argument("bufferSize");
-           int overlap = call.argument("overlap");
-           double toleranceCents = call.argument("toleranceCents") != null ?
-                   ((Double) call.argument("toleranceCents")).doubleValue() : 0.5;
-           double minPrecision = call.argument("minPrecision") != null ?
-                   ((Double) call.argument("minPrecision")).doubleValue() : 0.8;
-
-           if (pitchService != null) {
-             pitchService.stopDetection();
-           }
-
-           pitchService = new PitchDetectionService(
-                   sampleRate != 0 ? sampleRate : 44100,
-                   bufferSize != 0 ? bufferSize : 2048,
-                   overlap != 0 ? overlap : 1024,
-                   toleranceCents != 0.0f ? toleranceCents : 1.0f,
-                   minPrecision != 0.0f ? minPrecision : 0.8,
-                   pitchHandler
-           );
-           pitchService.startDetection();
-          result.success(null);
+          startPitchDetection(call, result);
         }
-
         break;
 
       case "setParameters":
