@@ -1,6 +1,6 @@
 # Flutter Pitch Detection Plugin
 
-A Flutter plugin for real-time audio pitch detection using TarsosDSP on Android.
+A Flutter plugin for real-time pitch detection using TarsosDSP on Android.
 
 ## Features
 
