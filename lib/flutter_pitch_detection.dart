@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -18,38 +19,15 @@ abstract class FlutterPitchDetectionPlatform extends PlatformInterface {
 
   Stream<Map<String, dynamic>> get onPitchDetected;
 
-  Future<bool> requestMicrophonePermission() async {
-    var status = await Permission.microphone.status;
-
-    if (status.isGranted) return true;
-
-    final result = await Permission.microphone.request();
-
-    if (result.isPermanentlyDenied) {
-      await openAppSettings();
-      return false;
+  Future<void> startDetection({int? sampleRate, int? bufferSize, int? overlap,}) async {
+    try {
+      await _instance.startDetection(sampleRate: sampleRate, bufferSize: bufferSize, overlap: overlap);
+    } on PlatformException catch (e) {
+      if (e.code == 'PERMISSION_DENIED') {
+        await openAppSettings();
+      }
+      rethrow;
     }
-
-    return result.isGranted;
-  }
-
-  Future<void> startDetection({
-    int? sampleRate,
-    int? bufferSize,
-    int? overlap,
-  }) async {
-    final hasPermission = await _instance.requestMicrophonePermission();
-    if (!hasPermission) {
-      throw Exception('Microphone permission not granted');
-    }
-
-    await Future.delayed(const Duration(milliseconds: 1000));
-
-    await _instance.startDetection(
-      sampleRate: sampleRate,
-      bufferSize: bufferSize,
-      overlap: overlap,
-    );
   }
 
   Future<void> stopDetection() async {

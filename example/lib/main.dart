@@ -16,6 +16,8 @@ void main() {
 //TODO add isOnPitch
 //TODO fix permission issues
 
+//TODO send audio stream to user
+
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -194,3 +196,5 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
+
+

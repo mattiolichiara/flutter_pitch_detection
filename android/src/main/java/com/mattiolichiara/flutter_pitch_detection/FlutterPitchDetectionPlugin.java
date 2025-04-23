@@ -17,7 +17,18 @@ import android.os.Looper;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler {
+import android.app.Activity;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.Manifest;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import io.flutter.embedding.engine.plugins.activity.ActivityAware;
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
+
+public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler, ActivityAware {
   private static final String CHANNEL = "pitch_detection/methods";
   private static final String EVENT_CHANNEL = "pitch_detection/events";
 
@@ -26,9 +37,35 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
   private EventChannel.EventSink eventSink;
   private PitchDetectionService pitchService;
   private final Object sinkLock = new Object();
+  private Activity activity;
+  private Context context;
+  private int sampleRate;
+  private int bufferSize;
+
+
+  @Override
+  public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
+    this.activity = binding.getActivity();
+  }
+
+  @Override
+  public void onDetachedFromActivity() {
+    this.activity = null;
+  }
+
+  @Override
+  public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
+    this.activity = binding.getActivity();
+  }
+
+  @Override
+  public void onDetachedFromActivityForConfigChanges() {
+    this.activity = null;
+  }
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
+    context = binding.getApplicationContext();
     methodChannel = new MethodChannel(binding.getBinaryMessenger(), CHANNEL);
     methodChannel.setMethodCallHandler(this);
 
@@ -45,28 +82,38 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
 //        break;
 
       case "startDetection":
-        int sampleRate = call.argument("sampleRate");
-        int bufferSize = call.argument("bufferSize");
-        int overlap = call.argument("overlap");
-        double toleranceCents = call.argument("toleranceCents") != null ?
-                ((Double) call.argument("toleranceCents")).doubleValue() : 0.5;
-        double minPrecision = call.argument("minPrecision") != null ?
-                ((Double) call.argument("minPrecision")).doubleValue() : 0.8;
-
-        if (pitchService != null) {
-          pitchService.stopDetection();
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+          ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.RECORD_AUDIO}, 1001);
         }
 
-        pitchService = new PitchDetectionService(
-                sampleRate != 0 ? sampleRate : 44100,
-                bufferSize != 0 ? bufferSize : 2048,
-                overlap != 0 ? overlap : 1024,
-                toleranceCents != 0.0f ? toleranceCents : 1.0f,
-                minPrecision != 0.0f ? minPrecision : 0.8,
-                pitchHandler
-        );
-        pitchService.startDetection();
-        result.success(null);
+        if(ContextCompat.checkSelfPermission(activity, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+          result.error("PERMISSION_DENIED", "Microphone permission not granted", null);
+          return;
+        } else {
+           int sampleRate = call.argument("sampleRate");
+           int bufferSize = call.argument("bufferSize");
+           int overlap = call.argument("overlap");
+           double toleranceCents = call.argument("toleranceCents") != null ?
+                   ((Double) call.argument("toleranceCents")).doubleValue() : 0.5;
+           double minPrecision = call.argument("minPrecision") != null ?
+                   ((Double) call.argument("minPrecision")).doubleValue() : 0.8;
+
+           if (pitchService != null) {
+             pitchService.stopDetection();
+           }
+
+           pitchService = new PitchDetectionService(
+                   sampleRate != 0 ? sampleRate : 44100,
+                   bufferSize != 0 ? bufferSize : 2048,
+                   overlap != 0 ? overlap : 1024,
+                   toleranceCents != 0.0f ? toleranceCents : 1.0f,
+                   minPrecision != 0.0f ? minPrecision : 0.8,
+                   pitchHandler
+           );
+           pitchService.startDetection();
+          result.success(null);
+        }
+
         break;
 
       case "setParameters":
