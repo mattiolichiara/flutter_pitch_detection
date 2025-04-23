@@ -118,8 +118,8 @@ class _MyAppState extends State<MyApp> {
       isRecording = false;
       accuracy = 0;
       isOnPitch = false;
-      double volume = 0;
-      double volumeFromDbFS = 0;
+      volume = 0;
+      volumeFromDbFS = 0;
     });
   }
 
@@ -191,5 +191,8 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
+
+
+
 
 
