@@ -1,15 +1,20 @@
-# flutter_pitch_detection
+# Flutter Pitch Detection Plugin
 
-A new Flutter plugin project.
+A Flutter plugin for real-time audio pitch detection using TarsosDSP on Android.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/to/develop-plugins),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+- Real-time pitch detection
+- Frequency, note name, and octave detection
+- Volume measurement (normalized and dBFS)
+- Pitch accuracy and probability
+- Configurable parameters (sample rate, buffer size, etc.)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Installation
+
+Add to your `pubspec.yaml`:
+
+```yaml
+dependencies:
+  flutter_pitch_detection: ^x.x.x
 
