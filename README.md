@@ -87,7 +87,7 @@ _pitchSubscription?.cancel();
 
 **Core Methods** <br>
 - `startDetection({int? sampleRate, int? bufferSize, int? overlap,})`	Starts real-time pitch detection. Callback returns (frequency, note, octave, accuracy, volume). <br>
-- `stopDetection()`	Stops the detection. <br>
+- `stopDetection()`	Stops the detection. <br><br>
 
 **Configuration (Call before startDetection)** <br>
 - `setSampleRate(int rate)`	Sets audio sample rate (e.g., 44100). <br>
@@ -98,7 +98,7 @@ _pitchSubscription?.cancel();
 - `getSampleRate()`	Returns current sample rate. <br>
 - `getBufferSize()`	Returns current buffer size. <br>
 - `getMinPrecision()`	Returns current min precision. <br>
-- `getToleranceCents()`	Returns current tolerance. <br>
+- `getToleranceCents()`	Returns current tolerance. <br><br>
 
 **Real-Time Data** <br>
 - `onPitchDetected` A real-time event stream that provides continuous pitch detection updates. Subscribe to this stream to receive live audio analysis data, including frequency, note, volume, and accuracy metrics. <br><br>
