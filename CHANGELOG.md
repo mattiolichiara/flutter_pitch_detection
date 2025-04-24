@@ -4,6 +4,10 @@
 - Features: Real-time pitch, note, and volume detection
 - Android-only support
 
+## 1.0.1
+
+- Documentation Update
+
 ## 1.0.2
 
 - Documentation Update
