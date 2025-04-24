@@ -5,7 +5,8 @@ A Flutter plugin for real-time pitch detection using TarsosDSP on Android.
 ## Features
 
 - Real-time pitch detection
-- Frequency, note name, and octave detection
+- Frequency, note name, octave and MIDI note detection
+- Raw audio data access (normalized and PCM formats)
 - Volume measurement (normalized and dBFS)
 - Pitch accuracy and probability
 - Configurable parameters (sample rate, buffer size, etc.)
@@ -67,6 +68,7 @@ StreamSubscription<Map<String, dynamic>>? _pitchSubscription;
 
 _pitchSubscription = FlutterPitchDetectionPlatform.instance.onPitchDetected.listen((event) async {
     await pitchDetector.getNote();
+    await pitchDetector.getMidiNote();
     await pitchDetector.getFrequency();
     await pitchDetector.printNoteOctave();
     await pitchDetector.getOctave();
@@ -79,6 +81,8 @@ _pitchSubscription = FlutterPitchDetectionPlatform.instance.onPitchDetected.list
     await pitchDetector.isOnPitch(toleranceCents, minPrecision);
     await pitchDetector.getVolume();
     await pitchDetector.getVolumeFromDbFS();
+    await _pitchDetection.getRawPcmDataFromStream();
+    await _pitchDetection.getRawDataFromStream();
 });    
 ```
 
@@ -94,7 +98,7 @@ _pitchSubscription?.cancel();
 - `startDetection({int? sampleRate, int? bufferSize, int? overlap,})`	Starts real-time pitch detection. Callback returns (frequency, note, octave, accuracy, volume). <br>
 - `stopDetection()`	Stops the detection. <br><br>
 
-**Configuration (Call before startDetection)** <br>
+**Configuration** <br>
 - `setSampleRate(int rate)`	Sets audio sample rate (e.g., 44100). <br>
 - `setBufferSize(int size)`	Sets buffer size (min 7056). <br>
 - `setMinPrecision(double precision)`	Sets minimum pitch confidence threshold (0.0 to 1.0). <br>
@@ -109,6 +113,7 @@ _pitchSubscription?.cancel();
 - `onPitchDetected` A real-time event stream that provides continuous pitch detection updates. Subscribe to this stream to receive live audio analysis data, including frequency, note, volume, and accuracy metrics. <br><br>
 - `getFrequency()`	Returns current detected frequency (Hz). <br>
 - `getNote()`	Returns musical note (e.g., "C"). <br>
+- `getMidiNote()` Returns current MIDI note number. (0-127) <br>
 - `getOctave()`	Returns note octave (e.g., 4). <br>
 - `printNoteOctave()`	Logs note+octave (e.g., "C4"). <br>
 - `isOnPitch()`	Returns bool if pitch meets precision. <br>
@@ -116,11 +121,12 @@ _pitchSubscription?.cancel();
 - `getVolume()`	Returns normalized volume (0.0 to 100.0). <br>
 - `getVolumeFromDbFS()`	Returns volume in dBFS (0.0 to 100.0). <br>
 - `isRecording()`	Returns bool if detection is active. <br>
+- `getRawDataFromStream()` Returns raw PCM byte data. <br>
+- `getRawPcmDataFromStream()` Returns both formats in one call. <br>
 
 ## Important Notes
 
 - **Android-only:** This plugin does not support iOS **yet**. <br>
-- **Parameter Order:** Set configs (`setSampleRate`, `setBufferSize`, etc.) **before** `startDetection`. <br>
 - **Permissions:** Mic permissions are **automatically handled** on Android. <br>
 
 ## Example App

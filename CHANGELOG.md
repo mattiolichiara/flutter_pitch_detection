@@ -11,3 +11,10 @@
 ## 1.0.2
 
 - Documentation Update
+
+## 1.1.2
+
+**New Features**
+- `getMidiNote()` method
+- `getRawDataFromStream()` (normalized doubles)
+- `getRawPcmDataFromStream()` (16-bit PCM)

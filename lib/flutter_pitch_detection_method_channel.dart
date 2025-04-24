@@ -138,6 +138,16 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
   }
 
   @override
+  Future<int> getMidiNote() async {
+    try {
+      final result = await _methodChannel.invokeMethod('getMidiNote');
+      return result ?? 0;
+    } on PlatformException catch(e) {
+      throw Exception("Error Retrieving Current MIDI Note: ${e.message}");
+    }
+  }
+
+  @override
   Future<int> getOctave() async {
     try {
       return await _methodChannel.invokeMethod('getOctave');
@@ -231,6 +241,25 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
       return await _methodChannel.invokeMethod('getVolumeFromDbFS');
     } on PlatformException catch(e) {
       throw Exception("Volume from DbFS Read Error: ${e.message}");
+    }
+  }
+
+  @override
+  Future<List<double>> getRawDataFromStream() async {
+    try {
+      final result = await _methodChannel.invokeMethod<List<dynamic>>('getRawDataFromStream');
+      return result?.map((e) => (e as num).toDouble()).toList() ?? <double>[];
+    } on PlatformException catch(e) {
+      throw Exception("Raw Stream Data Read Error: ${e.message}");
+    }
+  }
+
+  @override
+  Future<Uint8List> getRawPcmDataFromStream() async {
+    try {
+      return await _methodChannel.invokeMethod('getRawPcmDataFromStream');
+    } on PlatformException catch(e) {
+      throw Exception("PCM Stream Data Read Error: ${e.message}");
     }
   }
 }

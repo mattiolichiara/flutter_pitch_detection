@@ -11,7 +11,6 @@ void main() {
   runApp(const MyApp());
 }
 
-//TODO send audio stream to user
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -21,9 +20,10 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final _flutterPitchDetectionPlugin = FlutterPitchDetection();
+  final pitchDetector = FlutterPitchDetection();
   StreamSubscription<Map<String, dynamic>>? _pitchSubscription;
   String note = "N";
+  int midiNote = 0;
   double frequency = 0;
   String noteOctave = "N0";
   int octave = 0;
@@ -36,11 +36,12 @@ class _MyAppState extends State<MyApp> {
   double minPrecision = 0;
   double volume = 0;
   double volumeFromDbFS = 0;
+  Uint8List? pcmData;
+  List<double>? streamData;
 
   @override
   void initState() {
     super.initState();
-    //initPlatformState();
   }
 
   void onStartPressed() async {
@@ -48,34 +49,40 @@ class _MyAppState extends State<MyApp> {
       isRecording = true;
     });
 
-    await _flutterPitchDetectionPlugin.startDetection();
-    bool rec = await _flutterPitchDetectionPlugin.isRecording();
+    await pitchDetector.startDetection();
+    bool rec = await pitchDetector.isRecording();
     debugPrint("[START] Is Recording: $rec");
 
-    _flutterPitchDetectionPlugin.setToleranceCents(0.9);
-    _flutterPitchDetectionPlugin.setBufferSize(8192);
-    _flutterPitchDetectionPlugin.setSampleRate(44100);
-    _flutterPitchDetectionPlugin.setParameters(toleranceCents: 0.6, bufferSize: 8192, sampleRate: 44100, minPrecision: 0.7);
+    pitchDetector.setToleranceCents(0.9);
+    pitchDetector.setBufferSize(8192);
+    pitchDetector.setSampleRate(44100);
+    pitchDetector.setParameters(toleranceCents: 0.6, bufferSize: 8192, sampleRate: 44100, minPrecision: 0.7);
 
     _pitchSubscription = FlutterPitchDetectionPlatform.instance.onPitchDetected.listen((event) async {
       //debugPrint("Stream on");
 
-      final newNote = await _flutterPitchDetectionPlugin.getNote();
-      final newFrequency = await _flutterPitchDetectionPlugin.getFrequency();
-      final newNoteOctave = await _flutterPitchDetectionPlugin.printNoteOctave();
-      final newOctave = await _flutterPitchDetectionPlugin.getOctave();
-      final newToleranceCents = await _flutterPitchDetectionPlugin.getToleranceCents();
-      final newBufferSize = await _flutterPitchDetectionPlugin.getBufferSize();
-      final newSampleRate = await _flutterPitchDetectionPlugin.getSampleRate();
-      final newIsRecording = await _flutterPitchDetectionPlugin.isRecording();
-      final newMinPrecision = await _flutterPitchDetectionPlugin.getMinPrecision();
-      final newAccuracy = await _flutterPitchDetectionPlugin.getAccuracy(toleranceCents);
-      final newIsOnPitch = await _flutterPitchDetectionPlugin.isOnPitch(toleranceCents, minPrecision);
-      final newVolume = await _flutterPitchDetectionPlugin.getVolume();
-      final newVolumeFromDbSF = await _flutterPitchDetectionPlugin.getVolumeFromDbFS();
+      final newNote = await pitchDetector.getNote();
+      final newMidiNote = await pitchDetector.getMidiNote();
+      final newFrequency = await pitchDetector.getFrequency();
+      final newNoteOctave = await pitchDetector.printNoteOctave();
+      final newOctave = await pitchDetector.getOctave();
+      final newToleranceCents = await pitchDetector.getToleranceCents();
+      final newBufferSize = await pitchDetector.getBufferSize();
+      final newSampleRate = await pitchDetector.getSampleRate();
+      final newIsRecording = await pitchDetector.isRecording();
+      final newMinPrecision = await pitchDetector.getMinPrecision();
+      final newAccuracy = await pitchDetector.getAccuracy(toleranceCents);
+      final newIsOnPitch = await pitchDetector.isOnPitch(toleranceCents, minPrecision);
+      final newVolume = await pitchDetector.getVolume();
+      final newVolumeFromDbSF = await pitchDetector.getVolumeFromDbFS();
+      final newPcmData = await pitchDetector.getRawPcmDataFromStream();
+      final newStreamData = await pitchDetector.getRawDataFromStream();
+      debugPrint("PCM DATA: $newPcmData");
+      debugPrint("RAW DATA: $newStreamData");
 
       setState(() {
         note = newNote;
+        midiNote = newMidiNote;
         frequency = newFrequency;
         noteOctave = newNoteOctave;
         octave = newOctave;
@@ -88,6 +95,8 @@ class _MyAppState extends State<MyApp> {
         isOnPitch = newIsOnPitch;
         volume = newVolume;
         volumeFromDbFS = newVolumeFromDbSF;
+        pcmData = newPcmData;
+        streamData = newStreamData;
       });
     });
   }
@@ -97,8 +106,8 @@ class _MyAppState extends State<MyApp> {
       isRecording = false;
     });
 
-    await _flutterPitchDetectionPlugin.stopDetection();
-    bool rec = await _flutterPitchDetectionPlugin.isRecording();
+    await pitchDetector.stopDetection();
+    bool rec = await pitchDetector.isRecording();
     debugPrint("[STOP] Is Recording: $rec");
 
     await _pitchSubscription?.cancel();
@@ -109,6 +118,7 @@ class _MyAppState extends State<MyApp> {
   void resetValues() {
     setState(() {
       note = "N";
+      midiNote = 0;
       frequency = 0;
       noteOctave = "N0";
       octave = 0;
@@ -120,6 +130,8 @@ class _MyAppState extends State<MyApp> {
       isOnPitch = false;
       volume = 0;
       volumeFromDbFS = 0;
+      pcmData = null;
+      streamData = null;
     });
   }
 
@@ -168,6 +180,7 @@ class _MyAppState extends State<MyApp> {
               //SizedBox(height: size.height * 0.3),
               Text("Pitch: $noteOctave", style: TextStyle(fontSize: 20)),
               Text("Note: $note", style: TextStyle(fontSize: 18)),
+              Text("Midi Note: $midiNote", style: TextStyle(fontSize: 18)),
               Text("Octave: $octave", style: TextStyle(fontSize: 18)),
               Text("Frequency: ${frequency.toStringAsFixed(2)} Hz", style: TextStyle(fontSize: 18)),
               Text("Accuracy: $accuracy%", style: TextStyle(fontSize: 18)),

@@ -80,6 +80,10 @@ abstract class FlutterPitchDetectionPlatform extends PlatformInterface {
     return await FlutterPitchDetectionPlatform.instance.getNote();
   }
 
+  Future<int> getMidiNote() async {
+    return await FlutterPitchDetectionPlatform.instance.getMidiNote();
+  }
+
   Future<int> getOctave() async {
     return await FlutterPitchDetectionPlatform.instance.getOctave();
   }
@@ -118,5 +122,13 @@ abstract class FlutterPitchDetectionPlatform extends PlatformInterface {
 
   Future<double> getVolumeFromDbFS() async {
     return FlutterPitchDetectionPlatform.instance.getVolumeFromDbFS();
+  }
+
+  Future<List<double>> getRawDataFromStream() async {
+    return FlutterPitchDetectionPlatform.instance.getRawDataFromStream();
+  }
+
+  Future<Uint8List> getRawPcmDataFromStream() async {
+    return FlutterPitchDetectionPlatform.instance.getRawPcmDataFromStream();
   }
 }

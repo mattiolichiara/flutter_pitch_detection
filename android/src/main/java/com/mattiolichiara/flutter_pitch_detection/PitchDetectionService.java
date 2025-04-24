@@ -5,6 +5,8 @@ import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import be.tarsos.dsp.AudioProcessor;
 import be.tarsos.dsp.AudioEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PitchDetectionService {
     private AudioDispatcher dispatcher;
@@ -20,6 +22,8 @@ public class PitchDetectionService {
     private double lastPitchProbability = 0.0;
     private double volume = 0;
     private double volumeFromDbFS = 0;
+    private List<Double> rawAudioData = new ArrayList<>();
+    private List<Byte> rawPcmData = new ArrayList<>();
 
 //    public String getPlatformVersion() {
 //        return "Android " + android.os.Build.VERSION.RELEASE;
@@ -125,9 +129,26 @@ public class PitchDetectionService {
         return midiToNoteName(currentMidiNote);
     }
 
+    public int getMidiNote() {
+        if (currentMidiNote == -1) return 0;
+        return currentMidiNote;
+    }
+
     public int getOctave() {
         if (currentMidiNote == -1) return -1;
         return midiToOctave(currentMidiNote);
+    }
+
+    public synchronized List<Double> getRawDataFromStream() {
+        return new ArrayList<>(rawAudioData);
+    }
+
+    public synchronized byte[] getRawPcmDataFromStream() {
+        byte[] pcmArray = new byte[rawPcmData.size()];
+        for (int i = 0; i < rawPcmData.size(); i++) {
+            pcmArray[i] = rawPcmData.get(i);
+        }
+        return pcmArray;
     }
 
     public String printNoteOctave() {
@@ -207,13 +228,26 @@ public class PitchDetectionService {
                     synchronized (PitchDetectionService.this) {
                         volume = calculateNormalizedVolume(audioBuffer);
                         volumeFromDbFS = calculateNormalizedVolumeFromDbFS(audioBuffer);
+
+                        for (float sample : audioBuffer) {
+                            rawAudioData.add((double) sample);
+
+                            short pcmSample = (short) (sample * Short.MAX_VALUE);
+                            rawPcmData.add((byte) (pcmSample & 0xff));
+                            rawPcmData.add((byte) ((pcmSample >> 8) & 0xff));
+                        }
+
+                        if (rawAudioData.size() > sampleRate * 10) {
+                            int samplesToKeep = sampleRate;
+                            rawAudioData = rawAudioData.subList(rawAudioData.size() - samplesToKeep, rawAudioData.size());
+                            rawPcmData = rawPcmData.subList(rawPcmData.size() - (samplesToKeep * 2), rawPcmData.size());
+                        }
                     }
                     return true;
                 }
 
                 @Override
                 public void processingFinished() {
-                    // No special cleanup needed
                 }
             });
 

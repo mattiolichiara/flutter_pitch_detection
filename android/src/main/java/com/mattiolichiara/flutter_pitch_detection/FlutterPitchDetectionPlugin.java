@@ -28,6 +28,8 @@ import androidx.core.content.ContextCompat;
 
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler, ActivityAware, PluginRegistry.RequestPermissionsResultListener {
   private static final String CHANNEL = "pitch_detection/methods";
@@ -264,6 +266,19 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
         }
         break;
 
+      case "getMidiNote":
+        try {
+          if (pitchService != null) {
+            int midiNote = pitchService.getMidiNote();
+            result.success(midiNote);
+          } else {
+            result.error("SERVICE_NOT_RUNNING", "Pitch detection service not running", null);
+          }
+        } catch (Exception e) {
+          result.error("GET_MIDI_NOTE_FAILED", "Failed to get midi note: " + e.getMessage(), null);
+        }
+        break;
+
       case "getOctave":
         try {
           if (pitchService != null) {
@@ -401,6 +416,29 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
           }
         } catch (Exception e) {
           result.error("VOLUME_CHECK_FAILED", "Failed to get dBFS volume: " + e.getMessage(), null);
+        }
+        break;
+      case "getRawDataFromStream":
+        try {
+          if (pitchService != null) {
+            result.success(pitchService.getRawDataFromStream());
+          } else {
+            result.error("NOT_INITIALIZED", "Pitch detection not started", null);
+          }
+        } catch(Exception e) {
+          result.error("GET_RAW_DATA_FROM_STREAM_FAILED", "Failed to get dBFS volume: " + e.getMessage(), null);
+        }
+        break;
+
+      case "getRawPcmDataFromStream":
+        try {
+          if (pitchService != null) {
+            result.success(pitchService.getRawPcmDataFromStream());
+          } else {
+            result.error("NOT_INITIALIZED", "Pitch detection not started", null);
+          }
+        } catch(Exception e) {
+          result.error("GET_RAW_PCM_DATA_FROM_STREAM_FAILED", "Failed to get dBFS volume: " + e.getMessage(), null);
         }
         break;
 

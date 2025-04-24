@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'flutter_pitch_detection.dart';
 
 class FlutterPitchDetection {
@@ -64,6 +66,10 @@ class FlutterPitchDetection {
     return _platform.getNote();
   }
 
+  Future<int> getMidiNote() async {
+    return _platform.getMidiNote();
+  }
+
   Future<int> getOctave() async {
     return _platform.getOctave();
   }
@@ -102,5 +108,13 @@ class FlutterPitchDetection {
 
   Future<double> getVolumeFromDbFS() async {
     return _platform.getVolumeFromDbFS();
+  }
+
+  Future<List<double>> getRawDataFromStream() {
+    return _platform.getRawDataFromStream();
+  }
+
+  Future<Uint8List> getRawPcmDataFromStream() {
+    return _platform.getRawPcmDataFromStream();
   }
 }
