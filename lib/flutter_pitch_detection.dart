@@ -1,6 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import 'flutter_pitch_detection_method_channel.dart';
 
@@ -24,7 +24,7 @@ abstract class FlutterPitchDetectionPlatform extends PlatformInterface {
       await _instance.startDetection(sampleRate: sampleRate, bufferSize: bufferSize, overlap: overlap);
     } on PlatformException catch (e) {
       if (e.code == 'PERMISSION_DENIED') {
-        await openAppSettings();
+        debugPrint('Permission denied');
       }
       rethrow;
     }
