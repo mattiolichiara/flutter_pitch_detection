@@ -131,7 +131,7 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
   Future<String> getNote() async {
     try {
       final result = await _methodChannel.invokeMethod('getNote');
-      return result ?? "N0";
+      return result ?? "";
     } on PlatformException catch(e) {
       throw Exception("Error Retrieving Current Note: ${e.message}");
     }

@@ -456,12 +456,27 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
         if (eventSink != null) {
           int midi = pitchService.frequencyToMidi(pitch);
           Map<String, Object> data = new HashMap<>();
-          data.put("frequency", pitch);
+          data.put("noteOctave", pitchService.printNoteOctave());
           data.put("note", pitchService.midiToNoteName(midi));
           data.put("octave", pitchService.midiToOctave(midi));
-          data.put("midi", midi);
+          data.put("midiNote", midi);
+          data.put("frequency", pitch);
+
+          double toleranceCents = pitchService.getToleranceCents();
+          double minPrecision = pitchService.getMinPrecision();
+
+          data.put("accuracy", pitchService.getAccuracy(toleranceCents));
+          data.put("isOnPitch", pitchService.isOnPitch(toleranceCents, minPrecision));
           data.put("volume", pitchService.getVolume());
           data.put("volumeDbFS", pitchService.getVolumeFromDbFS());
+
+          data.put("toleranceCents", toleranceCents);
+          data.put("bufferSize", pitchService.getBufferSize());
+          data.put("sampleRate", pitchService.getSampleRate());
+          data.put("minPrecision", minPrecision);
+
+          data.put("pcmData", pitchService.getRawPcmDataFromStream());
+          data.put("streamData", pitchService.getRawDataFromStream());
 
           eventSink.success(data);
         }

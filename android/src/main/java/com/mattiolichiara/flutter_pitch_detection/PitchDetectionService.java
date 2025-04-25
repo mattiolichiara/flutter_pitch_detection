@@ -7,6 +7,7 @@ import be.tarsos.dsp.AudioProcessor;
 import be.tarsos.dsp.AudioEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayDeque;
 
 public class PitchDetectionService {
     private AudioDispatcher dispatcher;
@@ -22,8 +23,9 @@ public class PitchDetectionService {
     private double lastPitchProbability = 0.0;
     private double volume = 0;
     private double volumeFromDbFS = 0;
-    private List<Double> rawAudioData = new ArrayList<>();
-    private List<Byte> rawPcmData = new ArrayList<>();
+    private ArrayDeque<Double> rawAudioData = new ArrayDeque<>();
+    private ArrayDeque<Byte> rawPcmData = new ArrayDeque<>();
+    private int maxSamplesToKeep = 44100;
 
 //    public String getPlatformVersion() {
 //        return "Android " + android.os.Build.VERSION.RELEASE;
@@ -38,6 +40,7 @@ public class PitchDetectionService {
         this.minPrecision = minPrecision;
         this.lastPitchProbability = 0.0;
         this.pitchHandler = pitchHandler;
+        this.maxSamplesToKeep = sampleRate;
     }
 
     //RMS
@@ -112,7 +115,7 @@ public class PitchDetectionService {
 
     protected String midiToNoteName(int midi) {
         String[] noteNames = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
-        if (midi < 0 || midi > 127) return "N";
+        if (midi < 0 || midi > 127) return "";
         return noteNames[midi % 12];
     }
 
@@ -125,7 +128,7 @@ public class PitchDetectionService {
     }
 
     public String getNote() {
-        if (currentMidiNote == -1) return "N";
+        if (currentMidiNote == -1) return "";
         return midiToNoteName(currentMidiNote);
     }
 
@@ -145,14 +148,15 @@ public class PitchDetectionService {
 
     public synchronized byte[] getRawPcmDataFromStream() {
         byte[] pcmArray = new byte[rawPcmData.size()];
-        for (int i = 0; i < rawPcmData.size(); i++) {
-            pcmArray[i] = rawPcmData.get(i);
+        int i = 0;
+        for (byte b : rawPcmData) {
+            pcmArray[i++] = b;
         }
         return pcmArray;
     }
 
     public String printNoteOctave() {
-        return getNote() + "" + getOctave();
+        return getNote() + (getOctave() == -1 ? "" : String.valueOf(getOctave()));
     }
 
     public void setParameters(int sampleRate, int bufferSize, double toleranceCents,
@@ -232,15 +236,17 @@ public class PitchDetectionService {
                         for (float sample : audioBuffer) {
                             rawAudioData.add((double) sample);
 
+                            // Convert to PCM
                             short pcmSample = (short) (sample * Short.MAX_VALUE);
                             rawPcmData.add((byte) (pcmSample & 0xff));
                             rawPcmData.add((byte) ((pcmSample >> 8) & 0xff));
-                        }
 
-                        if (rawAudioData.size() > sampleRate * 10) {
-                            int samplesToKeep = sampleRate;
-                            rawAudioData = rawAudioData.subList(rawAudioData.size() - samplesToKeep, rawAudioData.size());
-                            rawPcmData = rawPcmData.subList(rawPcmData.size() - (samplesToKeep * 2), rawPcmData.size());
+                            // Remove oldest samples if we exceed 1 second
+                            if (rawAudioData.size() > maxSamplesToKeep) {
+                                rawAudioData.removeFirst();
+                                rawPcmData.removeFirst();
+                                rawPcmData.removeFirst(); // Remove 2 PCM bytes per sample
+                            }
                         }
                     }
                     return true;
