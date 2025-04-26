@@ -133,12 +133,12 @@ public class PitchDetectionService {
     }
 
     public int getMidiNote() {
-        if (currentMidiNote == -1) return 0;
+        if (currentMidiNote == -1) return -1;
         return currentMidiNote;
     }
 
     public int getOctave() {
-        if (currentMidiNote < 0) return 0;
+        if (currentMidiNote < 0) return -1;
         return midiToOctave(currentMidiNote);
     }
 
