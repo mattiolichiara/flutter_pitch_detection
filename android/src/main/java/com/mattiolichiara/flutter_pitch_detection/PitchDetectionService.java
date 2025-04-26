@@ -138,7 +138,7 @@ public class PitchDetectionService {
     }
 
     public int getOctave() {
-        if (currentMidiNote == -1) return -1;
+        if (currentMidiNote < 0) return 0;
         return midiToOctave(currentMidiNote);
     }
 
