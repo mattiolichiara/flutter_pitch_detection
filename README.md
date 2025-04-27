@@ -10,7 +10,7 @@ A Flutter plugin for real-time pitch detection using TarsosDSP on Android.
 - Volume measurement (normalized and dBFS)
 - Pitch accuracy and probability
 - Configurable parameters (sample rate, buffer size, etc.)
-<br><br>
+  <br><br>
 
 <img src="https://github.com/user-attachments/assets/a7d3b6db-f199-4525-a2b4-ebc96d9e9b6d" width="200">
 <img src="https://github.com/user-attachments/assets/ff9a8d0d-eeb9-42c8-90b8-1614f604adb6" width="200">
@@ -38,12 +38,12 @@ import 'package:flutter_pitch_detection/flutter_pitch_detection.dart';
 final pitchDetector = FlutterPitchDetection(); 
 ```
 
-**Set Parameters (Optional but recommended)** 
+**Set Parameters (Optional but recommended)**
 <br><br>
 Set individual parameters:
 ```dart
-pitchDetector.setSampleRate(44100);  
-pitchDetector.setBufferSize(8192);   
+pitchDetector.setSampleRate(44100);
+pitchDetector.setBufferSize(8192);
 pitchDetector.setMinPrecision(0.8);
 ```
 
@@ -54,6 +54,8 @@ pitchDetector.setParameters(toleranceCents: 0.6, bufferSize: 8192, sampleRate: 4
 
 **Start Detection**
 ```dart
+StreamSubscription<Map<String, dynamic>>? _pitchSubscription;
+
 await pitchDetector.startDetection();
 ```
 
@@ -67,35 +69,65 @@ await pitchDetector.isRecording();
 StreamSubscription<Map<String, dynamic>>? _pitchSubscription;
 
 _pitchSubscription = FlutterPitchDetectionPlatform.instance.onPitchDetected.listen((event) async {
-    await pitchDetector.getNote();
-    await pitchDetector.getMidiNote();
-    await pitchDetector.getFrequency();
-    await pitchDetector.printNoteOctave();
-    await pitchDetector.getOctave();
-    await pitchDetector.getToleranceCents();
-    await pitchDetector.getBufferSize();
-    await pitchDetector.getSampleRate();
-    await pitchDetector.isRecording();
-    await pitchDetector.getMinPrecision();
-    await pitchDetector.getAccuracy(toleranceCents);
-    await pitchDetector.isOnPitch(toleranceCents, minPrecision);
-    await pitchDetector.getVolume();
-    await pitchDetector.getVolumeFromDbFS();
-    await _pitchDetection.getRawPcmDataFromStream();
-    await _pitchDetection.getRawDataFromStream();
+await pitchDetector.printNoteOctave();
+await pitchDetector.getNote();
+await pitchDetector.getOctave();
+await pitchDetector.getMidiNote();
+await pitchDetector.getFrequency();
+
+await pitchDetector.getAccuracy(toleranceCents);
+await pitchDetector.isOnPitch(toleranceCents, minPrecision);
+await pitchDetector.getVolume();
+await pitchDetector.getVolumeFromDbFS();
+
+await pitchDetector.getToleranceCents();
+await pitchDetector.getBufferSize();
+await pitchDetector.getSampleRate();
+await pitchDetector.getMinPrecision();
+
+await _pitchDetection.getRawPcmDataFromStream();
+await _pitchDetection.getRawDataFromStream();
 });    
+```
+Or
+```dart
+StreamSubscription<Map<String, dynamic>>? _pitchSubscription;
+
+_pitchSubscription = FlutterPitchDetectionPlatform.instance.onPitchDetected.listen((data) async {
+
+data['noteOctave'] ?? "";
+data['note'] ?? "";
+data['octave'] ?? -1;
+data['midiNote'] ?? -1;
+data['frequency'] ?? 0;
+
+data['accuracy'] ?? 0;
+data['isOnPitch'] ?? false;
+data['volume'] ?? 0;
+data['volumeDbFS'] ?? 0;
+
+data['toleranceCents'] ?? defaultTolerance;
+data['bufferSize'] ?? defaultBufferSize;
+data['sampleRate'] ?? defaultSampleRate;
+data['minPrecision'] ?? defaultPrecision;
+
+data['pcmData'] ?? Uint8List(0);
+data['streamData'] ?? [];
+});
 ```
 
 **Stop Detection**
 ```dart
+await _pitchSubscription?.cancel();
+_pitchSubscription = null;
+
 await pitchDetector.stopDetection();
-_pitchSubscription?.cancel();
 ```
 
 ## Method Reference
 
 **Core Methods** <br>
-- `startDetection({int? sampleRate, int? bufferSize, int? overlap,})`	Starts real-time pitch detection. Callback returns (frequency, note, octave, accuracy, volume). <br>
+- `startDetection({int? sampleRate, int? bufferSize, int? overlap,})`	Starts real-time pitch detection. Callback returns (frequency, note, octave, accuracy, volume, etc.). <br>
 - `stopDetection()`	Stops the detection. <br><br>
 
 **Configuration** <br>
