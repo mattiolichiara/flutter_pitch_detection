@@ -3,7 +3,6 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_pitch_detection/flutter_pitch_detection.dart';
-import 'package:flutter_pitch_detection/flutter_pitch_detection_platform_interface.dart';
 
 void main() {
   runApp(const MyApp());
@@ -61,7 +60,7 @@ class _MyAppState extends State<MyApp> {
 
         pitchDetector.setParameters(toleranceCents: defaultTolerance, bufferSize: defaultBufferSize, sampleRate: defaultSampleRate, minPrecision: defaultPrecision);
 
-        _pitchSubscription = FlutterPitchDetectionPlatform.instance.onPitchDetected.listen((data) async {
+        _pitchSubscription = pitchDetector.onPitchDetected.listen((data) async {
 
           final stream = await pitchDetector.getRawDataFromStream();
           final pcm = await pitchDetector.getRawPcmDataFromStream();
@@ -82,9 +81,6 @@ class _MyAppState extends State<MyApp> {
             bufferSize = data['bufferSize'] ?? defaultBufferSize;
             sampleRate = data['sampleRate'] ?? defaultSampleRate;
             minPrecision = data['minPrecision'] ?? defaultPrecision;
-
-            streamData = streamData;
-            debugPrint("RAW DATA: $streamData");
 
             streamData = stream;
             debugPrint("RAW DATA: $streamData");

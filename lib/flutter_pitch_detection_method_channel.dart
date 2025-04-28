@@ -1,5 +1,5 @@
 import 'package:flutter/services.dart';
-import 'flutter_pitch_detection.dart';
+import 'flutter_pitch_detection_platform_interface.dart';
 
 class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
   static const MethodChannel _methodChannel =
@@ -43,12 +43,6 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
       throw Exception('Failed to stop detection: ${e.message}');
     }
   }
-
-  // @override
-  // Future<String?> getPlatformVersion() async {
-  //   final version = await _methodChannel.invokeMethod<String>('getPlatformVersion');
-  //   return version;
-  // }
 
   @override
   Future<void> setParameters({
@@ -190,7 +184,7 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
   Future<void> setMinPrecision(double minPrecision) async {
     try {
       await _methodChannel.invokeMethod('setMinPrecision', {
-        'setMinPrecision': setMinPrecision,
+        'setMinPrecision': minPrecision,
       });
     } on PlatformException catch (e) {
       throw Exception('Failed to set min precision: ${e.message}');

@@ -1,134 +1,184 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'dart:typed_data';
 
-import 'flutter_pitch_detection_method_channel.dart';
+import 'flutter_pitch_detection_platform_interface.dart';
 
-abstract class FlutterPitchDetectionPlatform extends PlatformInterface {
-  FlutterPitchDetectionPlatform() : super(token: _token);
-  static final Object _token = Object();
+/// A Flutter plugin for real-time audio pitch detection.
+///
+/// Supports detection of musical notes, frequencies, and volume levels from microphone input.
+///
+///- Real-time pitch detection
+///- Frequency, note name, octave and MIDI note detection
+///- Raw audio data access (normalized and PCM formats)
+///- Volume measurement (normalized and dBFS)
+///- Pitch accuracy and probability
+///- Configurable parameters (sample rate, buffer size, etc.)
+///
+class FlutterPitchDetection {
 
-  static FlutterPitchDetectionPlatform _instance = MethodChannelFlutterPitchDetection();
+  final FlutterPitchDetectionPlatform _platform;
 
-  static FlutterPitchDetectionPlatform get instance => _instance;
+  FlutterPitchDetection() : _platform = FlutterPitchDetectionPlatform.instance;
 
-  static set instance(FlutterPitchDetectionPlatform instance) {
-    PlatformInterface.verifyToken(instance, _token);
-    _instance = instance;
+  /// Stream of pitch detection results.
+  ///
+  /// Each event contains a map with:
+  /// - `note` (String): Musical note (e.g., "C")
+  /// - `octave` (int): Octave number
+  /// - `noteOctave` (String): Combined note+octave (e.g., "C4")
+  /// - `frequency` (double): Frequency in Hz
+  /// - `midiNote` (int): MIDI note number
+  /// - `volume` (double): Normalized volume (0.0-100.0)
+  /// - `volumeDbFS` (double): Volume in dBFS (0.0-100.0)
+  /// - `accuracy` (int): Detection confidence (0-100)
+  /// - `isOnPitch` (bool): True if within tolerance
+  /// - `toleranceCents` (double): Current pitch tolerance (0.0 to 0.1)
+  /// - `bufferSize` (int): Current buffer size (default: 8196, min: 7056)
+  /// - `sampleRate` (int): Audio sampling rate (defaults to 44100)
+  /// - `minPrecision` (double): Current pitch confidence (0.0 to 0.1)
+  /// - `pcmData` (Uint8List): Raw PCM byte data.
+  /// - `streamData` (List`<`double`>`): Processed audio data (normalized doubles)
+  Stream<Map<String, dynamic>> get onPitchDetected {
+    return _platform.onPitchDetected;
   }
 
-  Stream<Map<String, dynamic>> get onPitchDetected;
-
-  Future<void> startDetection({int? sampleRate, int? bufferSize, int? overlap,}) async {
-    try {
-      await _instance.startDetection(sampleRate: sampleRate, bufferSize: bufferSize, overlap: overlap);
-    } on PlatformException catch (e) {
-      if (e.code == 'PERMISSION_DENIED') {
-        debugPrint('Permission denied');
-      }
-      rethrow;
-    }
+  /// Starts audio processing and begins pitch detection.
+  ///
+  /// Throws a [PlatformException] if:
+  /// - Microphone permission is denied
+  /// - Audio capture fails to start
+  Future<void> startDetection({
+    int? sampleRate,
+    int? bufferSize,
+    int? overlap,
+  }) async {
+    return _platform.startDetection(
+      sampleRate: sampleRate ?? 44100,
+      bufferSize: bufferSize ?? 8192,
+      overlap: overlap ?? 0,
+    );
   }
 
+  /// Stops pitch detection and releases audio resources.
   Future<void> stopDetection() async {
-    await _instance.stopDetection();
+    return _platform.stopDetection();
   }
 
-  // Future<String?> getPlatformVersion() {
-  //   return FlutterPitchDetectionPlatform.instance.getPlatformVersion();
-  // }
-
+  /// Configures audio processing parameters.
+  ///
+  /// - [sampleRate]: Audio sample rate in Hz (default: 44100)
+  /// - [bufferSize]: FFT buffer size (default: 8196, min: 7056)
+  /// - [toleranceCents]: Pitch tolerance in cents (0.0 to 1.0)
+  /// - [minPrecision]: Minimum confidence threshold (0.0 to 1.0)
   Future<void> setParameters({
     int? sampleRate,
     int? bufferSize,
     double? toleranceCents,
     double? minPrecision,
   }) async {
-    await FlutterPitchDetectionPlatform.instance.setParameters(
-      sampleRate: sampleRate,
-      bufferSize: bufferSize,
-      toleranceCents: toleranceCents,
-      minPrecision: minPrecision,
-    );
+    return _platform.setParameters(sampleRate: sampleRate, bufferSize: bufferSize, toleranceCents: toleranceCents, minPrecision: minPrecision);
   }
 
+  ///Sets audio sample rate (e.g., 44100).
   Future<void> setSampleRate(int sampleRate) async {
-    await FlutterPitchDetectionPlatform.instance.setSampleRate(sampleRate);
+    return _platform.setSampleRate(sampleRate);
   }
 
+  ///Sets buffer size (default: 8196, min: 7056).
   Future<void> setBufferSize(int bufferSize) async {
-    await FlutterPitchDetectionPlatform.instance.setBufferSize(bufferSize);
+    return _platform.setBufferSize(bufferSize);
   }
 
+  ///Returns current sample rate.
   Future<int> getSampleRate() async {
-    return await FlutterPitchDetectionPlatform.instance.getSampleRate();
+    return _platform.getSampleRate();
   }
 
+  ///Returns current buffer size.
   Future<int> getBufferSize() async {
-    return await FlutterPitchDetectionPlatform.instance.getBufferSize();
+    return _platform.getBufferSize();
   }
 
+  ///Checks if detection is currently running.
   Future<bool> isRecording() async {
-    return await FlutterPitchDetectionPlatform.instance.isRecording();
+    return _platform.isRecording();
   }
 
+  ///Returns current detected frequency (Hz).
   Future<double> getFrequency() async {
-    return await FlutterPitchDetectionPlatform.instance.getFrequency();
+    return _platform.getFrequency();
   }
 
+  ///Returns musical note (e.g., "C").
   Future<String> getNote() async {
-    return await FlutterPitchDetectionPlatform.instance.getNote();
+    return _platform.getNote();
   }
 
+  ///Returns current MIDI note number. (0-127)
   Future<int> getMidiNote() async {
-    return await FlutterPitchDetectionPlatform.instance.getMidiNote();
+    return _platform.getMidiNote();
   }
 
+  ///Returns note octave (e.g., 4).
   Future<int> getOctave() async {
-    return await FlutterPitchDetectionPlatform.instance.getOctave();
+    return _platform.getOctave();
   }
 
+  ///Logs note+octave (e.g., "C4").
   Future<String> printNoteOctave() async {
-    return await FlutterPitchDetectionPlatform.instance.printNoteOctave();
+    return _platform.printNoteOctave();
   }
 
+  ///Returns bool if pitch meets precision.
   Future<bool> isOnPitch(double toleranceCents, double minPrecision) async {
-    return FlutterPitchDetectionPlatform.instance.isOnPitch(toleranceCents, minPrecision);
+    return _platform.isOnPitch(toleranceCents, minPrecision);
   }
 
+  ///Returns pitch confidence in % (0 to 100).
   Future<int> getAccuracy(double toleranceCents) async {
-    return FlutterPitchDetectionPlatform.instance.getAccuracy(toleranceCents);
+    return _platform.getAccuracy(toleranceCents);
   }
 
+  ///Returns current precision(0.0 to 1.0)
   Future<double> getMinPrecision() async {
-    return FlutterPitchDetectionPlatform.instance.getMinPrecision();
+    return _platform.getMinPrecision();
   }
 
+  ///Sets minimum pitch confidence threshold (0.0 to 1.0).
   Future<void> setMinPrecision(double minPrecision) async {
-    return FlutterPitchDetectionPlatform.instance.setMinPrecision(minPrecision);
+    return _platform.setMinPrecision(minPrecision);
   }
 
+  ///Returns current tolerance (0.0 to 1.0).
   Future<double> getToleranceCents() async {
-    return FlutterPitchDetectionPlatform.instance.getToleranceCents();
+    return _platform.getToleranceCents();
   }
 
+  ///Sets pitch tolerance in cents (0.0 to 1.0).
   Future<void> setToleranceCents(double toleranceCents) async {
-    return FlutterPitchDetectionPlatform.instance.setToleranceCents(toleranceCents);
+    return _platform.setToleranceCents(toleranceCents);
   }
 
+  ///Returns normalized volume (0.0 to 100.0).
   Future<double> getVolume() async {
-    return FlutterPitchDetectionPlatform.instance.getVolume();
+    return _platform.getVolume();
   }
 
+  ///Returns volume in dBFS (0.0 to 100.0).
   Future<double> getVolumeFromDbFS() async {
-    return FlutterPitchDetectionPlatform.instance.getVolumeFromDbFS();
+    return _platform.getVolumeFromDbFS();
   }
 
-  Future<List<double>> getRawDataFromStream() async {
-    return FlutterPitchDetectionPlatform.instance.getRawDataFromStream();
+
+
+  ///Gets processed audio data (normalized doubles).
+  Future<List<double>> getRawDataFromStream() {
+    return _platform.getRawDataFromStream();
   }
 
-  Future<Uint8List> getRawPcmDataFromStream() async {
-    return FlutterPitchDetectionPlatform.instance.getRawPcmDataFromStream();
+  /// Gets raw PCM audio data from the current buffer.
+  ///
+  /// Returns [Uint8List] of 16-bit PCM samples.
+  Future<Uint8List> getRawPcmDataFromStream() {
+    return _platform.getRawPcmDataFromStream();
   }
 }

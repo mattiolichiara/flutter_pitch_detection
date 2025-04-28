@@ -1,120 +1,52 @@
-import 'dart:typed_data';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-import 'flutter_pitch_detection.dart';
+import 'flutter_pitch_detection_method_channel.dart';
 
-class FlutterPitchDetection {
-  final FlutterPitchDetectionPlatform _platform;
+abstract class FlutterPitchDetectionPlatform extends PlatformInterface {
+  FlutterPitchDetectionPlatform() : super(token: _token);
+  static final Object _token = Object();
 
-  FlutterPitchDetection() : _platform = FlutterPitchDetectionPlatform.instance;
+  static FlutterPitchDetectionPlatform _instance = MethodChannelFlutterPitchDetection();
 
-  Stream<Map<String, dynamic>> get onPitchDetected => _platform.onPitchDetected;
+  static FlutterPitchDetectionPlatform get instance => _instance;
 
-  // Future<String?> getPlatformVersion() {
-  //   return _platform.getPlatformVersion();
-  // }
-
-  Future<void> startDetection({
-    int? sampleRate,
-    int? bufferSize,
-    int? overlap,
-  }) async {
-    return _platform.startDetection(
-      sampleRate: sampleRate ?? 44100,
-      bufferSize: bufferSize ?? 8192,
-      overlap: overlap ?? 0,
-    );
+  static set instance(FlutterPitchDetectionPlatform instance) {
+    PlatformInterface.verifyToken(instance, _token);
+    _instance = instance;
   }
 
-  Future<void> stopDetection() async {
-    return _platform.stopDetection();
-  }
+  Stream<Map<String, dynamic>> get onPitchDetected;
+  Future<void> startDetection({int? sampleRate, int? bufferSize, int? overlap,});
+  Future<void> stopDetection();
 
   Future<void> setParameters({
     int? sampleRate,
     int? bufferSize,
     double? toleranceCents,
     double? minPrecision,
-  }) async {
-    return _platform.setParameters(sampleRate: sampleRate, bufferSize: bufferSize, toleranceCents: toleranceCents, minPrecision: minPrecision);
-  }
+  });
+  Future<void> setSampleRate(int sampleRate);
+  Future<void> setBufferSize(int bufferSize);
+  Future<void> setMinPrecision(double minPrecision);
+  Future<void> setToleranceCents(double toleranceCents);
+  Future<int> getSampleRate();
+  Future<int> getBufferSize();
+  Future<double> getMinPrecision();
+  Future<double> getToleranceCents();
 
-  Future<void> setSampleRate(int sampleRate) async {
-    return _platform.setSampleRate(sampleRate);
-  }
+  Future<bool> isRecording();
+  Future<double> getFrequency();
+  Future<String> getNote();
+  Future<int> getMidiNote();
+  Future<int> getOctave();
+  Future<String> printNoteOctave();
+  Future<bool> isOnPitch(double toleranceCents, double minPrecision);
+  Future<int> getAccuracy(double toleranceCents);
+  Future<double> getVolume();
+  Future<double> getVolumeFromDbFS();
 
-  Future<void> setBufferSize(int bufferSize) async {
-    return _platform.setBufferSize(bufferSize);
-  }
-
-  Future<int> getSampleRate() async {
-    return _platform.getSampleRate();
-  }
-
-  Future<int> getBufferSize() async {
-    return _platform.getBufferSize();
-  }
-
-  Future<bool> isRecording() async {
-    return _platform.isRecording();
-  }
-
-  Future<double> getFrequency() async {
-    return _platform.getFrequency();
-  }
-
-  Future<String> getNote() async {
-    return _platform.getNote();
-  }
-
-  Future<int> getMidiNote() async {
-    return _platform.getMidiNote();
-  }
-
-  Future<int> getOctave() async {
-    return _platform.getOctave();
-  }
-
-  Future<String> printNoteOctave() async {
-    return _platform.printNoteOctave();
-  }
-
-  Future<bool> isOnPitch(double toleranceCents, double minPrecision) async {
-    return _platform.isOnPitch(toleranceCents, minPrecision);
-  }
-
-  Future<int> getAccuracy(double toleranceCents) async {
-    return _platform.getAccuracy(toleranceCents);
-  }
-
-  Future<double> getMinPrecision() async {
-    return _platform.getMinPrecision();
-  }
-
-  Future<void> setMinPrecision(double minPrecision) async {
-    return _platform.setMinPrecision(minPrecision);
-  }
-
-  Future<double> getToleranceCents() async {
-    return _platform.getToleranceCents();
-  }
-
-  Future<void> setToleranceCents(double toleranceCents) async {
-    return _platform.setToleranceCents(toleranceCents);
-  }
-
-  Future<double> getVolume() async {
-    return _platform.getVolume();
-  }
-
-  Future<double> getVolumeFromDbFS() async {
-    return _platform.getVolumeFromDbFS();
-  }
-
-  Future<List<double>> getRawDataFromStream() {
-    return _platform.getRawDataFromStream();
-  }
-
-  Future<Uint8List> getRawPcmDataFromStream() {
-    return _platform.getRawPcmDataFromStream();
-  }
+  Future<List<double>> getRawDataFromStream();
+  Future<Uint8List> getRawPcmDataFromStream();
 }
