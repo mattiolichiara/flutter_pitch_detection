@@ -152,8 +152,8 @@ await pitchDetector.stopDetection();
 - `getVolume()`	Returns normalized volume (0.0 to 100.0). <br>
 - `getVolumeFromDbFS()`	Returns volume in dBFS (0.0 to 100.0). <br>
 - `isRecording()`	Returns bool if detection is active. <br>
-- `getRawDataFromStream()` Returns raw PCM byte data. <br>
-- `getRawPcmDataFromStream()` Returns [P]rocessed audio data (normalized doubles). <br>
+- `getRawDataFromStream()` Returns Processed audio data (normalized doubles). <br>
+- `getRawPcmDataFromStream()` Returns raw PCM byte data. <br>
 
 ## Important Notes
 
