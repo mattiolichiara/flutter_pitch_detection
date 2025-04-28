@@ -20,3 +20,9 @@
 - `getRawPcmDataFromStream()` (16-bit PCM)
 
 - Removed Unnecessary Import
+
+## 1.1.3
+
+- Fixed an Error within Project Configuration
+- Added Code Documentation
+- Fixed a ReadMe Mistake

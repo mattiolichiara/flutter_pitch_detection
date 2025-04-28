@@ -68,51 +68,50 @@ await pitchDetector.isRecording();
 ```dart
 StreamSubscription<Map<String, dynamic>>? _pitchSubscription;
 
-_pitchSubscription = FlutterPitchDetectionPlatform.instance.onPitchDetected.listen((event) async {
-await pitchDetector.printNoteOctave();
-await pitchDetector.getNote();
-await pitchDetector.getOctave();
-await pitchDetector.getMidiNote();
-await pitchDetector.getFrequency();
-
-await pitchDetector.getAccuracy(toleranceCents);
-await pitchDetector.isOnPitch(toleranceCents, minPrecision);
-await pitchDetector.getVolume();
-await pitchDetector.getVolumeFromDbFS();
-
-await pitchDetector.getToleranceCents();
-await pitchDetector.getBufferSize();
-await pitchDetector.getSampleRate();
-await pitchDetector.getMinPrecision();
-
-await _pitchDetection.getRawPcmDataFromStream();
-await _pitchDetection.getRawDataFromStream();
+_pitchSubscription = pitchDetector.onPitchDetected.listen((data) async {
+    await pitchDetector.printNoteOctave();
+    await pitchDetector.getNote();
+    await pitchDetector.getOctave();
+    await pitchDetector.getMidiNote();
+    await pitchDetector.getFrequency();
+    
+    await pitchDetector.getAccuracy(toleranceCents);
+    await pitchDetector.isOnPitch(toleranceCents, minPrecision);
+    await pitchDetector.getVolume();
+    await pitchDetector.getVolumeFromDbFS();
+    
+    await pitchDetector.getToleranceCents();
+    await pitchDetector.getBufferSize();
+    await pitchDetector.getSampleRate();
+    await pitchDetector.getMinPrecision();
+    
+    await _pitchDetection.getRawPcmDataFromStream();
+    await _pitchDetection.getRawDataFromStream();
 });    
 ```
 Or
 ```dart
 StreamSubscription<Map<String, dynamic>>? _pitchSubscription;
 
-_pitchSubscription = FlutterPitchDetectionPlatform.instance.onPitchDetected.listen((data) async {
-
-data['noteOctave'] ?? "";
-data['note'] ?? "";
-data['octave'] ?? -1;
-data['midiNote'] ?? -1;
-data['frequency'] ?? 0;
-
-data['accuracy'] ?? 0;
-data['isOnPitch'] ?? false;
-data['volume'] ?? 0;
-data['volumeDbFS'] ?? 0;
-
-data['toleranceCents'] ?? defaultTolerance;
-data['bufferSize'] ?? defaultBufferSize;
-data['sampleRate'] ?? defaultSampleRate;
-data['minPrecision'] ?? defaultPrecision;
-
-data['pcmData'] ?? Uint8List(0);
-data['streamData'] ?? [];
+_pitchSubscription = pitchDetector.onPitchDetected.listen((data) async {
+    data['noteOctave'] ?? "";
+    data['note'] ?? "";
+    data['octave'] ?? -1;
+    data['midiNote'] ?? -1;
+    data['frequency'] ?? 0;
+    
+    data['accuracy'] ?? 0;
+    data['isOnPitch'] ?? false;
+    data['volume'] ?? 0;
+    data['volumeDbFS'] ?? 0;
+    
+    data['toleranceCents'] ?? defaultTolerance;
+    data['bufferSize'] ?? defaultBufferSize;
+    data['sampleRate'] ?? defaultSampleRate;
+    data['minPrecision'] ?? defaultPrecision;
+    
+    data['pcmData'] ?? Uint8List(0);
+    data['streamData'] ?? [];
 });
 ```
 
@@ -154,7 +153,7 @@ await pitchDetector.stopDetection();
 - `getVolumeFromDbFS()`	Returns volume in dBFS (0.0 to 100.0). <br>
 - `isRecording()`	Returns bool if detection is active. <br>
 - `getRawDataFromStream()` Returns raw PCM byte data. <br>
-- `getRawPcmDataFromStream()` Returns both formats in one call. <br>
+- `getRawPcmDataFromStream()` Returns [P]rocessed audio data (normalized doubles). <br>
 
 ## Important Notes
 
