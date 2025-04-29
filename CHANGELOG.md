@@ -32,3 +32,7 @@
 **New Features**
 - `getPitchDeviation()` method
 - Formatted Code Following Dart Guidelines
+
+## 1.2.1
+
+- Media Update in README.md
