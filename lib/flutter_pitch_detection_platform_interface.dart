@@ -7,7 +7,8 @@ abstract class FlutterPitchDetectionPlatform extends PlatformInterface {
   FlutterPitchDetectionPlatform() : super(token: _token);
   static final Object _token = Object();
 
-  static FlutterPitchDetectionPlatform _instance = MethodChannelFlutterPitchDetection();
+  static FlutterPitchDetectionPlatform _instance =
+      MethodChannelFlutterPitchDetection();
 
   static FlutterPitchDetectionPlatform get instance => _instance;
 
@@ -17,7 +18,7 @@ abstract class FlutterPitchDetectionPlatform extends PlatformInterface {
   }
 
   Stream<Map<String, dynamic>> get onPitchDetected;
-  Future<void> startDetection({int? sampleRate, int? bufferSize, int? overlap,});
+  Future<void> startDetection({int? sampleRate, int? bufferSize, int? overlap});
   Future<void> stopDetection();
 
   Future<void> setParameters({
