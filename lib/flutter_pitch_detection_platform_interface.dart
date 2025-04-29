@@ -43,6 +43,7 @@ abstract class FlutterPitchDetectionPlatform extends PlatformInterface {
   Future<String> printNoteOctave();
   Future<bool> isOnPitch(double toleranceCents, double minPrecision);
   Future<int> getAccuracy(double toleranceCents);
+  Future<double> getPitchDeviation();
   Future<double> getVolume();
   Future<double> getVolumeFromDbFS();
 

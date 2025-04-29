@@ -2,19 +2,21 @@ import 'package:flutter/services.dart';
 import 'flutter_pitch_detection_platform_interface.dart';
 
 class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
-  static const MethodChannel _methodChannel =
-  MethodChannel('pitch_detection/methods');
+  static const MethodChannel _methodChannel = MethodChannel(
+    'pitch_detection/methods',
+  );
 
-  static const EventChannel _eventChannel =
-  EventChannel('pitch_detection/events');
+  static const EventChannel _eventChannel = EventChannel(
+    'pitch_detection/events',
+  );
 
   Stream<Map<String, dynamic>>? _pitchStream;
 
   @override
   Stream<Map<String, dynamic>> get onPitchDetected {
-    _pitchStream ??= _eventChannel
-        .receiveBroadcastStream()
-        .map((event) => Map<String, dynamic>.from(event));
+    _pitchStream ??= _eventChannel.receiveBroadcastStream().map(
+      (event) => Map<String, dynamic>.from(event),
+    );
     return _pitchStream!;
   }
 
@@ -84,12 +86,12 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
       throw Exception('Failed to set buffer size: ${e.message}');
     }
   }
-  
+
   @override
   Future<int> getSampleRate() async {
     try {
       return await _methodChannel.invokeMethod('getSampleRate');
-    } on PlatformException catch(e) {
+    } on PlatformException catch (e) {
       throw Exception("Sample Rate Read Error: ${e.message}");
     }
   }
@@ -98,7 +100,7 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
   Future<int> getBufferSize() async {
     try {
       return await _methodChannel.invokeMethod('getBufferSize');
-    } on PlatformException catch(e) {
+    } on PlatformException catch (e) {
       throw Exception("Buffer Size Read Error: ${e.message}");
     }
   }
@@ -107,7 +109,7 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
   Future<bool> isRecording() async {
     try {
       return await _methodChannel.invokeMethod('isRecording');
-    } on PlatformException catch(e) {
+    } on PlatformException catch (e) {
       throw Exception("Error Retrieving Recording Status: ${e.message}");
     }
   }
@@ -116,7 +118,7 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
   Future<double> getFrequency() async {
     try {
       return await _methodChannel.invokeMethod('getFrequency');
-    } on PlatformException catch(e) {
+    } on PlatformException catch (e) {
       throw Exception("Error Retrieving Frequency: ${e.message}");
     }
   }
@@ -126,7 +128,7 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
     try {
       final result = await _methodChannel.invokeMethod('getNote');
       return result ?? "";
-    } on PlatformException catch(e) {
+    } on PlatformException catch (e) {
       throw Exception("Error Retrieving Current Note: ${e.message}");
     }
   }
@@ -136,7 +138,7 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
     try {
       final result = await _methodChannel.invokeMethod('getMidiNote');
       return result ?? 0;
-    } on PlatformException catch(e) {
+    } on PlatformException catch (e) {
       throw Exception("Error Retrieving Current MIDI Note: ${e.message}");
     }
   }
@@ -145,7 +147,7 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
   Future<int> getOctave() async {
     try {
       return await _methodChannel.invokeMethod('getOctave');
-    } on PlatformException catch(e) {
+    } on PlatformException catch (e) {
       throw Exception("Error Retrieving Octave: ${e.message}");
     }
   }
@@ -154,7 +156,7 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
   Future<String> printNoteOctave() async {
     try {
       return await _methodChannel.invokeMethod('printNoteOctave');
-    } on PlatformException catch(e) {
+    } on PlatformException catch (e) {
       throw Exception("Error Retrieving Note-Octave Full Value: ${e.message}");
     }
   }
@@ -162,7 +164,10 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
   @override
   Future<bool> isOnPitch(double toleranceCents, double minPrecision) async {
     try {
-      return await _methodChannel.invokeMethod('isOnPitch', {'toleranceCents': toleranceCents, 'minPrecision': minPrecision},);
+      return await _methodChannel.invokeMethod('isOnPitch', {
+        'toleranceCents': toleranceCents,
+        'minPrecision': minPrecision,
+      });
     } on PlatformException catch (e) {
       throw Exception("Failed to check pitch: ${e.message}");
     }
@@ -181,6 +186,15 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
   }
 
   @override
+  Future<double> getPitchDeviation() async {
+    try {
+      return await _methodChannel.invokeMethod('getPitchDeviation');
+    } on PlatformException catch (e) {
+      throw Exception("Pitch Deviation Read Error: ${e.message}");
+    }
+  }
+
+  @override
   Future<void> setMinPrecision(double minPrecision) async {
     try {
       await _methodChannel.invokeMethod('setMinPrecision', {
@@ -195,7 +209,7 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
   Future<double> getMinPrecision() async {
     try {
       return await _methodChannel.invokeMethod('getMinPrecision');
-    } on PlatformException catch(e) {
+    } on PlatformException catch (e) {
       throw Exception("Error Retrieving Min Precision Value: ${e.message}");
     }
   }
@@ -204,7 +218,7 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
   Future<double> getToleranceCents() async {
     try {
       return await _methodChannel.invokeMethod('getToleranceCents');
-    } on PlatformException catch(e) {
+    } on PlatformException catch (e) {
       throw Exception("Tolerance Hz Read Error: ${e.message}");
     }
   }
@@ -224,7 +238,7 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
   Future<double> getVolume() async {
     try {
       return await _methodChannel.invokeMethod('getVolume');
-    } on PlatformException catch(e) {
+    } on PlatformException catch (e) {
       throw Exception("Volume Read Error: ${e.message}");
     }
   }
@@ -233,7 +247,7 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
   Future<double> getVolumeFromDbFS() async {
     try {
       return await _methodChannel.invokeMethod('getVolumeFromDbFS');
-    } on PlatformException catch(e) {
+    } on PlatformException catch (e) {
       throw Exception("Volume from DbFS Read Error: ${e.message}");
     }
   }
@@ -241,9 +255,11 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
   @override
   Future<List<double>> getRawDataFromStream() async {
     try {
-      final result = await _methodChannel.invokeMethod<List<dynamic>>('getRawDataFromStream');
+      final result = await _methodChannel.invokeMethod<List<dynamic>>(
+        'getRawDataFromStream',
+      );
       return result?.map((e) => (e as num).toDouble()).toList() ?? <double>[];
-    } on PlatformException catch(e) {
+    } on PlatformException catch (e) {
       throw Exception("Raw Stream Data Read Error: ${e.message}");
     }
   }
@@ -252,7 +268,7 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
   Future<Uint8List> getRawPcmDataFromStream() async {
     try {
       return await _methodChannel.invokeMethod('getRawPcmDataFromStream');
-    } on PlatformException catch(e) {
+    } on PlatformException catch (e) {
       throw Exception("PCM Stream Data Read Error: ${e.message}");
     }
   }

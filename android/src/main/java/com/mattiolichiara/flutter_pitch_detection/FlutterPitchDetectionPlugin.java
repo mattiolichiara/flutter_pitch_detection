@@ -393,6 +393,19 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
         }
         break;
 
+      case "getPitchDeviation":
+        try {
+          if (pitchService != null) {
+            double pitchDeviation = pitchService.getPitchDeviation();
+            result.success(pitchDeviation);
+          } else {
+            result.error("SERVICE_NOT_RUNNING", "Pitch detection service not running", null);
+          }
+        } catch (Exception e) {
+          result.error("PITCH_DEVIATION_CHECK_FAILED", "Failed to get Pitch Deviation: " + e.getMessage(), null);
+        }
+        break;
+
       case "getVolume":
         try {
           if (pitchService != null) {
@@ -466,6 +479,7 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
           double minPrecision = pitchService.getMinPrecision();
 
           data.put("accuracy", pitchService.getAccuracy(toleranceCents));
+          data.put("pitchDeviation", pitchService.getPitchDeviation());
           data.put("isOnPitch", pitchService.isOnPitch(toleranceCents, minPrecision));
           data.put("volume", pitchService.getVolume());
           data.put("volumeDbFS", pitchService.getVolumeFromDbFS());

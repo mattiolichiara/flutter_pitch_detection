@@ -41,6 +41,7 @@ class _MyAppState extends State<MyApp> {
   double volumeDbFS = 0;
   Uint8List? pcmData;
   List<double>? streamData;
+  double pitchDeviation = 0;
 
   @override
   void initState() {
@@ -73,6 +74,7 @@ class _MyAppState extends State<MyApp> {
             frequency = data['frequency'] ?? 0;
 
             accuracy = data['accuracy'] ?? 0;
+            pitchDeviation = data['pitchDeviation'] ?? 0;
             isOnPitch = data['isOnPitch'] ?? false;
             volume = data['volume'] ?? 0;
             volumeDbFS = data['volumeDbFS'] ?? 0;
@@ -131,6 +133,7 @@ class _MyAppState extends State<MyApp> {
 
       isRecording = false;
       accuracy = 0;
+      pitchDeviation = 0;
       isOnPitch = false;
       volume = 0;
       volumeDbFS = 0;
@@ -190,6 +193,7 @@ class _MyAppState extends State<MyApp> {
               Text("Frequency: ${frequency.toStringAsFixed(2)} Hz", style: TextStyle(fontSize: 18)),
               SizedBox(height: size.height * 0.02),
               Text("Accuracy: $accuracy%", style: TextStyle(fontSize: 18)),
+              Text("Pitch Deviation: $pitchDeviation", style: TextStyle(fontSize: 18)),
               Text("Volume: ${volume.toStringAsFixed(2)}", style: TextStyle(fontSize: 18)),
               Text("Volume from DbSF: ${volumeDbFS.toStringAsFixed(2)}", style: TextStyle(fontSize: 18)),
               SizedBox(height: size.height * 0.02),
@@ -199,7 +203,6 @@ class _MyAppState extends State<MyApp> {
               Text("SampleRate: $sampleRate", style: TextStyle(fontSize: 16)),
               SizedBox(height: size.height * 0.02),
               Text("IsRecording: $isRecording", style: TextStyle(fontSize: 16)),
-              //Text("OnPitch", style: TextStyle(fontSize: 16, color: accuracy > minPrecision ? Colors.green : Colors.transparent)),
               Text("OnPitch", style: TextStyle(fontSize: 20, color: isOnPitch ? Colors.green : Colors.transparent)),
               SizedBox(height: size.height * 0.01),
               isRecording ? _stopButton(size) : _startButton(size),

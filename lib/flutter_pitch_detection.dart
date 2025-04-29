@@ -14,7 +14,6 @@ import 'flutter_pitch_detection_platform_interface.dart';
 ///- Configurable parameters (sample rate, buffer size, etc.)
 ///
 class FlutterPitchDetection {
-
   final FlutterPitchDetectionPlatform _platform;
 
   FlutterPitchDetection() : _platform = FlutterPitchDetectionPlatform.instance;
@@ -75,7 +74,12 @@ class FlutterPitchDetection {
     double? toleranceCents,
     double? minPrecision,
   }) async {
-    return _platform.setParameters(sampleRate: sampleRate, bufferSize: bufferSize, toleranceCents: toleranceCents, minPrecision: minPrecision);
+    return _platform.setParameters(
+      sampleRate: sampleRate,
+      bufferSize: bufferSize,
+      toleranceCents: toleranceCents,
+      minPrecision: minPrecision,
+    );
   }
 
   ///Sets audio sample rate (e.g., 44100).
@@ -138,6 +142,16 @@ class FlutterPitchDetection {
     return _platform.getAccuracy(toleranceCents);
   }
 
+  ///Returns the pitch deviation in cents (-50 to +50).
+  ///- Negative values mean the note is lower than target
+  ///- 0 means perfectly in tune
+  ///- Positive values mean the note is higher than target
+  ///
+  ///Returns 0 if no valid frequency is detected
+  Future<double> getPitchDeviation() async {
+    return _platform.getPitchDeviation();
+  }
+
   ///Returns current precision(0.0 to 1.0)
   Future<double> getMinPrecision() async {
     return _platform.getMinPrecision();
@@ -167,8 +181,6 @@ class FlutterPitchDetection {
   Future<double> getVolumeFromDbFS() async {
     return _platform.getVolumeFromDbFS();
   }
-
-
 
   ///Gets processed audio data (normalized doubles).
   Future<List<double>> getRawDataFromStream() {

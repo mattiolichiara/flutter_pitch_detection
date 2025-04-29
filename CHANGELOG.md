@@ -26,3 +26,9 @@
 - Fixed an Error within Project Configuration
 - Added Code Documentation
 - Fixed a ReadMe Mistake
+
+## 1.2.0
+
+**New Features**
+- `getPitchDeviation()` method
+- Formatted Code Following Dart Guidelines

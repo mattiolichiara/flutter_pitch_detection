@@ -8,6 +8,7 @@ import be.tarsos.dsp.AudioEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ArrayDeque;
+import java.text.DecimalFormat;
 
 public class PitchDetectionService {
     private AudioDispatcher dispatcher;
@@ -87,6 +88,19 @@ public class PitchDetectionService {
         }
 
         return (int) Math.round(100 * (1 - (centsDeviation / maxCents)));
+    }
+
+    public double getPitchDeviation() {
+        if (currentFrequency <= 0 || currentMidiNote == -1) return 0;
+
+        double targetFrequency = midiToFrequency(currentMidiNote);
+
+        double ratio = currentFrequency / targetFrequency;
+
+        double centsDeviation = 1200 * Math.log10(ratio) / Math.log10(2);
+
+        centsDeviation = Math.max(-50, Math.min(50, centsDeviation));
+        return Double.parseDouble(new DecimalFormat("#.##").format(centsDeviation));
     }
 
     public boolean isOnPitch(double toleranceCents, double minPrecision) {

@@ -12,10 +12,6 @@ A Flutter plugin for real-time pitch detection using TarsosDSP on Android.
 - Configurable parameters (sample rate, buffer size, etc.)
   <br><br>
 
-## Upcoming Features
-
-- A new accuracy function to measure the distance from the target pitch (in cents).
-
 <img src="https://github.com/user-attachments/assets/a7d3b6db-f199-4525-a2b4-ebc96d9e9b6d" width="200">
 <img src="https://github.com/user-attachments/assets/ff9a8d0d-eeb9-42c8-90b8-1614f604adb6" width="200">
 <img src="https://github.com/user-attachments/assets/af1b7431-d53a-40d3-b3cb-9c961f5242b1" width="200"> <br><br>
@@ -80,6 +76,7 @@ _pitchSubscription = pitchDetector.onPitchDetected.listen((data) async {
     await pitchDetector.getFrequency();
     
     await pitchDetector.getAccuracy(toleranceCents);
+    await pitchDetector.getPitchDeviation();
     await pitchDetector.isOnPitch(toleranceCents, minPrecision);
     await pitchDetector.getVolume();
     await pitchDetector.getVolumeFromDbFS();
@@ -105,6 +102,7 @@ _pitchSubscription = pitchDetector.onPitchDetected.listen((data) async {
     data['frequency'] ?? 0;
     
     data['accuracy'] ?? 0;
+    data['pitchDeviation'] ?? 0;
     data['isOnPitch'] ?? false;
     data['volume'] ?? 0;
     data['volumeDbFS'] ?? 0;
@@ -153,6 +151,7 @@ await pitchDetector.stopDetection();
 - `printNoteOctave()`	Logs note+octave (e.g., "C4"). <br>
 - `isOnPitch()`	Returns bool if pitch meets precision. <br>
 - `getAccuracy()`	Returns pitch confidence in % (0 to 100). <br>
+- `getPitchDeviation()`	Returns the pitch deviation in cents (-50 and +50). <br>
 - `getVolume()`	Returns normalized volume (0.0 to 100.0). <br>
 - `getVolumeFromDbFS()`	Returns volume in dBFS (0.0 to 100.0). <br>
 - `isRecording()`	Returns bool if detection is active. <br>
