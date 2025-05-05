@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ArrayDeque;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 public class PitchDetectionService {
     private AudioDispatcher dispatcher;
@@ -27,6 +29,7 @@ public class PitchDetectionService {
     private ArrayDeque<Double> rawAudioData = new ArrayDeque<>();
     private ArrayDeque<Byte> rawPcmData = new ArrayDeque<>();
     private int maxSamplesToKeep = 44100;
+    private final DecimalFormat decimalFormat;
 
 //    public String getPlatformVersion() {
 //        return "Android " + android.os.Build.VERSION.RELEASE;
@@ -42,6 +45,9 @@ public class PitchDetectionService {
         this.lastPitchProbability = 0.0;
         this.pitchHandler = pitchHandler;
         this.maxSamplesToKeep = sampleRate;
+
+        this.decimalFormat = (DecimalFormat) NumberFormat.getInstance(Locale.US);
+        this.decimalFormat.applyPattern("#.##");
     }
 
     //RMS
@@ -94,13 +100,15 @@ public class PitchDetectionService {
         if (currentFrequency <= 0 || currentMidiNote == -1) return 0;
 
         double targetFrequency = midiToFrequency(currentMidiNote);
-
         double ratio = currentFrequency / targetFrequency;
-
         double centsDeviation = 1200 * Math.log10(ratio) / Math.log10(2);
-
         centsDeviation = Math.max(-50, Math.min(50, centsDeviation));
-        return Double.parseDouble(new DecimalFormat("#.##").format(centsDeviation));
+
+        try {
+            return Double.parseDouble(decimalFormat.format(centsDeviation));
+        } catch (NumberFormatException e) {
+            return centsDeviation;
+        }
     }
 
     public boolean isOnPitch(double toleranceCents, double minPrecision) {

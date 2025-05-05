@@ -85,10 +85,10 @@ class _MyAppState extends State<MyApp> {
             minPrecision = data['minPrecision'] ?? defaultPrecision;
 
             streamData = stream;
-            debugPrint("RAW DATA: $streamData");
+            // debugPrint("RAW DATA: $streamData");
 
             pcmData = pcm;
-            debugPrint("PCM DATA: $pcmData");
+            // debugPrint("PCM DATA: $pcmData");
 
           });
         });

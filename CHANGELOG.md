@@ -36,3 +36,7 @@
 ## 1.2.1
 
 - Media Update in README.md
+
+## 1.2.2
+
+- Fixed app crashes that could occur in certain regional number formats

@@ -14,6 +14,7 @@ import com.mattiolichiara.flutter_pitch_detection.*;
 import android.os.Handler;
 import android.os.Looper;
 import io.flutter.plugin.common.PluginRegistry;
+import android.util.Log;
 
 import java.util.HashMap;
 import java.util.Map;
