@@ -43,8 +43,12 @@
 
 ## 1.3.0
 
+- Updated reference values for `pitchDeviance` since the previous value ranges might be confusing
+
 **New Features**
 - `setA4Reference` method (change reference frequency for A4)
 - `getA4Reference` method
 
-- Updated reference values for `pitchDeviance` since the previous value ranges might be confusing
+## 1.3.1
+
+- Media Update in README.md
