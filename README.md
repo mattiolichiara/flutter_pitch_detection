@@ -6,9 +6,10 @@ A Flutter plugin for real-time pitch detection using TarsosDSP on Android.
 
 - Real-time pitch detection
 - Frequency, note name, octave and MIDI note detection
+- Supports different A4 reference frequencies
 - Raw audio data access (normalized and PCM formats)
 - Volume measurement (normalized and dBFS)
-- Pitch accuracy and probability
+- Pitch accuracy and Pitch Deviation
 - Configurable parameters (sample rate, buffer size, etc.)
   <br><br>
 
@@ -45,11 +46,13 @@ Set individual parameters:
 pitchDetector.setSampleRate(44100);
 pitchDetector.setBufferSize(8192);
 pitchDetector.setMinPrecision(0.8);
+pitchDetector.setToleranceCents(0.6);
+pitchDetector.setA4Reference(440.0);
 ```
 
 Or set multiple parameters at once:
 ```dart
-pitchDetector.setParameters(toleranceCents: 0.6, bufferSize: 8192, sampleRate: 44100, minPrecision: 0.7);
+pitchDetector.setParameters(toleranceCents: 0.6, bufferSize: 8192, sampleRate: 44100, minPrecision: 0.7, a4Reference: 440.0);
 ```
 
 **Start Detection**
@@ -85,6 +88,7 @@ _pitchSubscription = pitchDetector.onPitchDetected.listen((data) async {
     await pitchDetector.getBufferSize();
     await pitchDetector.getSampleRate();
     await pitchDetector.getMinPrecision();
+    await pitchDetector.getA4Reference();
     
     await _pitchDetection.getRawPcmDataFromStream();
     await _pitchDetection.getRawDataFromStream();
@@ -111,6 +115,7 @@ _pitchSubscription = pitchDetector.onPitchDetected.listen((data) async {
     data['bufferSize'] ?? defaultBufferSize;
     data['sampleRate'] ?? defaultSampleRate;
     data['minPrecision'] ?? defaultPrecision;
+    data['a4Reference'] ?? defaultA4Reference;
     
     data['pcmData'] ?? Uint8List(0);
     data['streamData'] ?? [];
@@ -136,11 +141,13 @@ await pitchDetector.stopDetection();
 - `setBufferSize(int size)`	Sets buffer size (min 7056). <br>
 - `setMinPrecision(double precision)`	Sets minimum pitch confidence threshold (0.0 to 1.0). <br>
 - `setToleranceCents(int cents)`	Sets pitch tolerance in cents (0.0 to 1.0). <br>
+- `setA4Reference(double a4Reference)`	Sets the reference frequency for A4 in Hertz (defaults to 440.0). <br>
 
 - `getSampleRate()`	Returns current sample rate. <br>
 - `getBufferSize()`	Returns current buffer size. <br>
 - `getMinPrecision()`	Returns current min precision. <br>
-- `getToleranceCents()`	Returns current tolerance. <br><br>
+- `getToleranceCents()`	Returns current tolerance. <br>
+- `getA4Reference()`	Returns current reference frequency for A4 in Hertz. <br><br>
 
 **Real-Time Data** <br>
 - `onPitchDetected` A real-time event stream that provides continuous pitch detection updates. Subscribe to this stream to receive live audio analysis data, including frequency, note, volume, and accuracy metrics. <br><br>
@@ -151,7 +158,7 @@ await pitchDetector.stopDetection();
 - `printNoteOctave()`	Logs note+octave (e.g., "C4"). <br>
 - `isOnPitch()`	Returns bool if pitch meets precision. <br>
 - `getAccuracy()`	Returns pitch confidence in % (0 to 100). <br>
-- `getPitchDeviation()`	Returns the pitch deviation in cents (-50 and +50). <br>
+- `getPitchDeviation()`	Returns the pitch deviation in cents (-100 and +100). <br>
 - `getVolume()`	Returns normalized volume (0.0 to 100.0). <br>
 - `getVolumeFromDbFS()`	Returns volume in dBFS (0.0 to 100.0). <br>
 - `isRecording()`	Returns bool if detection is active. <br>

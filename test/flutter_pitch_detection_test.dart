@@ -7,8 +7,11 @@ import 'package:flutter_pitch_detection/flutter_pitch_detection_platform_interfa
 import 'package:flutter_pitch_detection/flutter_pitch_detection_method_channel.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-class MockFlutterPitchDetectionPlatform with MockPlatformInterfaceMixin implements FlutterPitchDetectionPlatform {
-  final StreamController<Map<String, dynamic>> _controller = StreamController.broadcast();
+class MockFlutterPitchDetectionPlatform
+    with MockPlatformInterfaceMixin
+    implements FlutterPitchDetectionPlatform {
+  final StreamController<Map<String, dynamic>> _controller =
+      StreamController.broadcast();
   int _sampleRate = 44100;
   int _bufferSize = 8192;
   double _toleranceCents = 0.8;
@@ -35,15 +38,17 @@ class MockFlutterPitchDetectionPlatform with MockPlatformInterfaceMixin implemen
     _sampleRate = sampleRate;
   }
 
-
-
   @override
   Future<void> stopDetection() async {
     _isRunning = false;
   }
 
   @override
-  Future<void> setParameters({int? sampleRate, int? bufferSize, double? toleranceCents}) async {
+  Future<void> setParameters({
+    int? sampleRate,
+    int? bufferSize,
+    double? toleranceCents,
+  }) async {
     if (sampleRate != null) _sampleRate = sampleRate;
     if (bufferSize != null) _bufferSize = bufferSize;
     if (toleranceCents != null) _toleranceCents = toleranceCents;
@@ -54,7 +59,7 @@ class MockFlutterPitchDetectionPlatform with MockPlatformInterfaceMixin implemen
       'pitch': pitch,
       'frequency': pitch,
       'probability': probability,
-      'isPitched': probability > 0.8
+      'isPitched': probability > 0.8,
     });
   }
 
@@ -109,7 +114,11 @@ class MockFlutterPitchDetectionPlatform with MockPlatformInterfaceMixin implemen
   }
 
   @override
-  Future<void> startDetection({int? sampleRate, int? bufferSize, int? overlap}) {
+  Future<void> startDetection({
+    int? sampleRate,
+    int? bufferSize,
+    int? overlap,
+  }) {
     // TODO: implement startDetection
     throw UnimplementedError();
   }
@@ -152,13 +161,13 @@ void main() {
       plugin = MethodChannelFlutterPitchDetection();
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-        switch (methodCall.method) {
-          // case 'getPlatformVersion':
-          //   return 'Android 10';
-          default:
-            return null;
-        }
-      });
+            switch (methodCall.method) {
+              // case 'getPlatformVersion':
+              //   return 'Android 10';
+              default:
+                return null;
+            }
+          });
     });
 
     tearDown(() {

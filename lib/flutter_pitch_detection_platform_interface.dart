@@ -26,15 +26,18 @@ abstract class FlutterPitchDetectionPlatform extends PlatformInterface {
     int? bufferSize,
     double? toleranceCents,
     double? minPrecision,
+    double? a4Reference,
   });
   Future<void> setSampleRate(int sampleRate);
   Future<void> setBufferSize(int bufferSize);
   Future<void> setMinPrecision(double minPrecision);
   Future<void> setToleranceCents(double toleranceCents);
+  Future<void> setA4Reference(double a4Reference);
   Future<int> getSampleRate();
   Future<int> getBufferSize();
   Future<double> getMinPrecision();
   Future<double> getToleranceCents();
+  Future<double> getA4Reference();
 
   Future<bool> isRecording();
   Future<double> getFrequency();

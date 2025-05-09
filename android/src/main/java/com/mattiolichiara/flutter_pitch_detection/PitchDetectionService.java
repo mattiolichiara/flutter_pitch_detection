@@ -30,12 +30,13 @@ public class PitchDetectionService {
     private ArrayDeque<Byte> rawPcmData = new ArrayDeque<>();
     private int maxSamplesToKeep = 44100;
     private final DecimalFormat decimalFormat;
+    private double a4Reference = 440.0;
 
 //    public String getPlatformVersion() {
 //        return "Android " + android.os.Build.VERSION.RELEASE;
 //    }
 
-    public PitchDetectionService(int sampleRate, int bufferSize, int overlap, double toleranceCents, double minPrecision,
+    public PitchDetectionService(int sampleRate, int bufferSize, int overlap, double toleranceCents, double minPrecision, double a4Reference,
                                  PitchDetectionHandler pitchHandler) {
         this.sampleRate = sampleRate;
         this.bufferSize = bufferSize;
@@ -45,6 +46,7 @@ public class PitchDetectionService {
         this.lastPitchProbability = 0.0;
         this.pitchHandler = pitchHandler;
         this.maxSamplesToKeep = sampleRate;
+        this.a4Reference = a4Reference;
 
         this.decimalFormat = (DecimalFormat) NumberFormat.getInstance(Locale.US);
         this.decimalFormat.applyPattern("#.##");
@@ -79,10 +81,21 @@ public class PitchDetectionService {
         return Math.max(-120, dbFS);
     }
 
+    public void setA4Reference(double a4Reference) {
+        if (a4Reference <= 0.0 || a4Reference > 2000.0) {
+            throw new IllegalArgumentException("A4 Reference must be between 0 and 2000 Hz");
+        }
+        this.a4Reference = a4Reference;
+    }
+
+    public double getA4Reference() {
+        return a4Reference;
+    }
+
     public int getAccuracy(double toleranceCents) {
         if (currentFrequency <= 0 || currentMidiNote == -1) return 0;
 
-        double targetFrequency = 440.0 * Math.pow(2, (currentMidiNote - 69) / 12.0);
+        double targetFrequency = a4Reference * Math.pow(2, (currentMidiNote - 69) / 12.0);
 
         double maxCents = toleranceCents * 100;
 
@@ -102,7 +115,7 @@ public class PitchDetectionService {
         double targetFrequency = midiToFrequency(currentMidiNote);
         double ratio = currentFrequency / targetFrequency;
         double centsDeviation = 1200 * Math.log10(ratio) / Math.log10(2);
-        centsDeviation = Math.max(-50, Math.min(50, centsDeviation));
+        centsDeviation = Math.max(-100, Math.min(100, centsDeviation));
 
         try {
             return Double.parseDouble(decimalFormat.format(centsDeviation));
@@ -114,7 +127,7 @@ public class PitchDetectionService {
     public boolean isOnPitch(double toleranceCents, double minPrecision) {
         if (currentFrequency <= 0 || currentMidiNote == -1) return false;
 
-        double targetFrequency = 440.0 * Math.pow(2, (currentMidiNote - 69) / 12.0);
+        double targetFrequency = a4Reference * Math.pow(2, (currentMidiNote - 69) / 12.0);
 
         double maxCents = toleranceCents * 100;
 
@@ -127,12 +140,12 @@ public class PitchDetectionService {
     }
 
     private double midiToFrequency(int midiNote) {
-        return 440.0 * Math.pow(2, (midiNote - 69) / 12.0);
+        return a4Reference * Math.pow(2, (midiNote - 69) / 12.0);
     }
 
     protected int frequencyToMidi(float frequency) {
         if (frequency <= 0) return -1;
-        return (int) Math.round(69 + 12 * (Math.log(frequency / 440.0) / Math.log(2)));
+        return (int) Math.round(69 + 12 * (Math.log(frequency / a4Reference) / Math.log(2)));
     }
 
     protected String midiToNoteName(int midi) {
@@ -182,11 +195,13 @@ public class PitchDetectionService {
     }
 
     public void setParameters(int sampleRate, int bufferSize, double toleranceCents,
-                              double minPrecision) {
+                              double minPrecision, double a4Reference) {
         this.sampleRate = sampleRate;
         this.bufferSize = bufferSize;
         this.toleranceCents = toleranceCents;
         this.minPrecision = minPrecision;
+
+        this.a4Reference = a4Reference;
     }
 
     public void setSampleRate(int sampleRate) {

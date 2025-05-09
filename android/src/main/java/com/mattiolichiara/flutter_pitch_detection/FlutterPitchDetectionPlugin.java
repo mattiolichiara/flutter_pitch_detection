@@ -106,6 +106,8 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
             ((Double) call.argument("toleranceCents")).doubleValue() : 0.5;
     double minPrecision = call.argument("minPrecision") != null ?
             ((Double) call.argument("minPrecision")).doubleValue() : 0.8;
+    double a4Reference = call.argument("a4Reference") != null ?
+            ((Double) call.argument("a4Reference")).doubleValue() : 440.0;
 
     if (pitchService != null) {
       pitchService.stopDetection();
@@ -117,6 +119,7 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
             overlap != 0 ? overlap : 1024,
             toleranceCents != 0.0f ? toleranceCents : 1.0f,
             minPrecision != 0.0f ? minPrecision : 0.8,
+            a4Reference,
             pitchHandler
     );
     pitchService.startDetection();
@@ -149,13 +152,16 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
                   ((Double) call.argument("toleranceCents")).doubleValue() : 0.5;
           double newMinPrecision = call.argument("minPrecision") != null ?
                   ((Double) call.argument("minPrecision")).doubleValue() : 0.8;
+          double newA4Reference = call.argument("a4Reference") != null ?
+                  ((Double) call.argument("a4Reference")).doubleValue() : 440.0;
 
           if (pitchService != null) {
             pitchService.setParameters(
                     newSampleRate != 0 ? newSampleRate : 44100,
                     newBufferSize != 0 ? newBufferSize : 1024,
                     newToleranceCents != 0.0f ? newToleranceCents : 1.0f,
-                    newMinPrecision != 0.0f ? newMinPrecision : 0.8
+                    newMinPrecision != 0.0f ? newMinPrecision : 0.8,
+                    newA4Reference
             );
             result.success(null);
           } else {
@@ -362,6 +368,36 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
         }
         break;
 
+      case "setA4Reference":
+        try {
+          double a4Reference = call.argument("a4Reference");
+          if (pitchService != null) {
+            if (a4Reference <= 0.0 || a4Reference > 2000.0) {
+              result.error("INVALID_A4_REFERENCE", "A4 Reference must be between 0 and 2000 Hz", null);
+            } else {
+              pitchService.setA4Reference(a4Reference);
+              result.success(null);
+            }
+          } else {
+            result.error("SERVICE_NOT_RUNNING", "Service not running", null);
+          }
+        } catch (Exception e) {
+          result.error("SET_A4_REFERENCE_FAILED", "Failed to set A4 Reference: " + e.getMessage(), null);
+        }
+        break;
+
+      case "getA4Reference":
+        try {
+          if (pitchService != null) {
+            result.success(pitchService.getA4Reference());
+          } else {
+            result.error("SERVICE_NOT_RUNNING", "Service not running", null);
+          }
+        } catch (Exception e) {
+          result.error("GET_A4_REFERENCE_FAILED", "Failed to get A4 Reference: " + e.getMessage(), null);
+        }
+        break;
+
       case "isOnPitch":
         try {
           if (pitchService != null) {
@@ -489,6 +525,7 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
           data.put("bufferSize", pitchService.getBufferSize());
           data.put("sampleRate", pitchService.getSampleRate());
           data.put("minPrecision", minPrecision);
+          data.put("a4Reference", pitchService.getA4Reference());
 
           data.put("pcmData", pitchService.getRawPcmDataFromStream());
           data.put("streamData", pitchService.getRawDataFromStream());
@@ -506,7 +543,7 @@ public class FlutterPitchDetectionPlugin implements FlutterPlugin, MethodCallHan
     }
 
     if (pitchService == null) {
-      pitchService = new PitchDetectionService(44100, 2048, 1024, 0.5, 0.8, pitchHandler);
+      pitchService = new PitchDetectionService(44100, 2048, 1024, 0.5, 0.8, 440.0, pitchHandler);
       pitchService.startDetection();
     }
   }

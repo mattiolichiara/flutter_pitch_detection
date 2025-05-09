@@ -68,17 +68,20 @@ class FlutterPitchDetection {
   /// - [bufferSize]: FFT buffer size (default: 8196, min: 7056)
   /// - [toleranceCents]: Pitch tolerance in cents (0.0 to 1.0)
   /// - [minPrecision]: Minimum confidence threshold (0.0 to 1.0)
+  /// - [a4Reference]: Reference frequency for A4 in Hz (defaults to 440.0)
   Future<void> setParameters({
     int? sampleRate,
     int? bufferSize,
     double? toleranceCents,
     double? minPrecision,
+    double? a4Reference,
   }) async {
     return _platform.setParameters(
       sampleRate: sampleRate,
       bufferSize: bufferSize,
       toleranceCents: toleranceCents,
       minPrecision: minPrecision,
+      a4Reference: a4Reference,
     );
   }
 
@@ -142,7 +145,7 @@ class FlutterPitchDetection {
     return _platform.getAccuracy(toleranceCents);
   }
 
-  ///Returns the pitch deviation in cents (-50 to +50).
+  ///Returns the pitch deviation in cents (-100 to +100).
   ///- Negative values mean the note is lower than target
   ///- 0 means perfectly in tune
   ///- Positive values mean the note is higher than target
@@ -160,6 +163,18 @@ class FlutterPitchDetection {
   ///Sets minimum pitch confidence threshold (0.0 to 1.0).
   Future<void> setMinPrecision(double minPrecision) async {
     return _platform.setMinPrecision(minPrecision);
+  }
+
+  ///Returns current reference frequency for A4 in Hertz
+  Future<double> getA4Reference() async {
+    return _platform.getA4Reference();
+  }
+
+  /// Sets the reference frequency for A4 in Hertz (defaults to 440.0)
+  ///
+  /// Throws IllegalArgumentException if frequency is not between 0 and 2000 Hz
+  Future<void> setA4Reference(double a4Reference) async {
+    return _platform.setA4Reference(a4Reference);
   }
 
   ///Returns current tolerance (0.0 to 1.0).

@@ -52,6 +52,7 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
     int? bufferSize,
     double? toleranceCents,
     double? minPrecision,
+    double? a4Reference,
   }) async {
     try {
       await _methodChannel.invokeMethod('setParameters', {
@@ -59,6 +60,7 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
         if (bufferSize != null) 'bufferSize': bufferSize,
         if (toleranceCents != null) 'toleranceCents': toleranceCents,
         if (minPrecision != null) 'minPrecision': minPrecision,
+        if (a4Reference != null) 'a4Reference': a4Reference,
       });
     } on PlatformException catch (e) {
       throw Exception('Failed to set parameters: ${e.message}');
@@ -231,6 +233,26 @@ class MethodChannelFlutterPitchDetection extends FlutterPitchDetectionPlatform {
       });
     } on PlatformException catch (e) {
       throw Exception('Failed to set toleranceCents: ${e.message}');
+    }
+  }
+
+  @override
+  Future<void> setA4Reference(double a4Reference) async {
+    try {
+      await _methodChannel.invokeMethod('setA4Reference', {
+        'setA4Reference': a4Reference,
+      });
+    } on PlatformException catch (e) {
+      throw Exception('Failed to set A4 reference: ${e.message}');
+    }
+  }
+
+  @override
+  Future<double> getA4Reference() async {
+    try {
+      return await _methodChannel.invokeMethod('getA4Reference');
+    } on PlatformException catch (e) {
+      throw Exception("Error Retrieving A4 Reference Value: ${e.message}");
     }
   }
 

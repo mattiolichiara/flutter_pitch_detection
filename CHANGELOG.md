@@ -40,3 +40,11 @@
 ## 1.2.2
 
 - Fixed app crashes that could occur in certain regional number formats
+
+## 1.3.0
+
+**New Features**
+- `setA4Reference` method (change reference frequency for A4)
+- `getA4Reference` method
+
+- Updated reference values for `pitchDeviance` since the previous value ranges might be confusing
