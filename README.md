@@ -13,9 +13,10 @@ A Flutter plugin for real-time pitch detection using TarsosDSP on Android.
 - Configurable parameters (sample rate, buffer size, etc.)
   <br><br>
 
-<img src="https://github.com/user-attachments/assets/90c70e6b-7ce2-4a15-bd94-16b99287b03b" width="200">
-<img src="https://github.com/user-attachments/assets/01f94304-1f4f-44a0-9f89-984262b0fa0b" width="200">
-<img src="https://github.com/user-attachments/assets/8d52ba3d-456a-4d21-a05c-4a4a5d645a01" width="200"> <br><br>
+<img src="https://github.com/user-attachments/assets/3750aabf-b8d6-4369-8da1-2a7af50fb1b3" width="200">
+<img src="https://github.com/user-attachments/assets/59e50f65-61df-4114-a49c-819e054f4008" width="200">
+<img src="https://github.com/user-attachments/assets/d51b1dcb-346b-4b5b-8c24-0c709b9188d8" width="200"> <br><br>
+
 
 ## Installation
 
